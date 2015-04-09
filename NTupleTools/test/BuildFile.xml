@@ -12,6 +12,7 @@
     <use   name="DataFormats/Common"/>
     <use   name="Geometry/Records"/>
     <use   name="Geometry/TrackerGeometryBuilder"/>
+    <use   name="SLHCL1TrackTriggerSimulations/NTupleTools"/>
     <use   name="clhep"/>
     <use   name="root"/>
   </library>
