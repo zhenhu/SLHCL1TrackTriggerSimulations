@@ -249,8 +249,6 @@ NTupleStubs::NTupleStubs(const edm::ParameterSet& iConfig) :
     //produces<std::vector<bool> >                    (prefixDigi_ + "psmodule"       + suffix_);
     produces<std::vector<unsigned> >                (prefixDigi_ + "modId"          + suffix_);
     produces<std::vector<unsigned> >                (prefixDigi_ + "geoId"          + suffix_);
-    produces<std::vector<unsigned> >                (prefixDigi_ + "clusId"         + suffix_);
-    produces<std::vector<unsigned> >                (prefixDigi_ + "stubId"         + suffix_);
     //produces<std::vector<int> >                     (prefixDigi_ + "col"            + suffix_);
     //produces<std::vector<int> >                     (prefixDigi_ + "row"            + suffix_);
     produces<std::vector<int> >                     (prefixDigi_ + "adc"            + suffix_);
@@ -283,87 +281,6 @@ void NTupleStubs::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) 
     unsigned checkunsigned = 4294967295;
     uint32_t checkuint32_t = 4294967295;
     assert(checkunsigned == checkuint32_t);
-
-    /// Learn the geometry
-    /*
-    std::map<uint32_t, uint32_t> moduleIdMap;
-    TrackingGeometry::DetUnitContainer::const_iterator trkIterator;
-    for(trkIterator = theGeometry->detUnits().begin(); trkIterator != theGeometry->detUnits().end(); ++trkIterator) {
-        DetId id = (**trkIterator).geographicalId();
-        double r = (**trkIterator).position().perp();
-        if ( (**trkIterator).type().isBarrel() &&
-             (**trkIterator).type().isTrackerPixel() &&
-             (r>20.0) &&
-             id.subdetId() == PixelSubdetector::PixelBarrel) {
-            //uint32_t lay = PXBDetId(id).layer();
-            //uint32_t rod = PXBDetId(id).ladder();
-            uint32_t mod = PXBDetId(id).module();
-            uint32_t moduleId = getModuleId(id);
-            //double zModule = (**trkIterator).position().z();
-            //std::cout << "moduleId: " << moduleId << " module: " << mod << " zModule: " << zModule << std::endl;
-
-            if (mod % 2 != 0) { // inner stack
-                if (moduleIdMap.find(moduleId) == moduleIdMap.end() )
-                    moduleIdMap.insert(std::make_pair(moduleId, 0) );
-                else
-                    edm::LogError("NTupleStubs") << "Found duplicate: " << moduleId;
-            } else { // outer stack
-                if (moduleIdMap.find(moduleId) == moduleIdMap.end() )
-                    edm::LogError("NTupleStubs") << "Cannot find the inner stack paired with : " << moduleId;
-            }
-
-        } else if ( (**trkIterator).type().isEndcap() &&
-                    (**trkIterator).type().isTrackerPixel() &&
-                    (fabs(r)>20.0) &&
-                    id.subdetId() == PixelSubdetector::PixelEndcap) {
-            //uint32_t side = PXFDetId(id).side();
-            //uint32_t disk = PXFDetId(id).disk();
-            //uint32_t ring = PXFDetId(id).ring();
-            uint32_t mod  = PXFDetId(id).module();
-            uint32_t moduleId = getModuleId(id);
-            //double phiModule = (**trkIterator).position().phi();
-            //if (phiModule < 0) phiModule += 2*M_PI;
-            //std::cout << "moduleId: " << moduleId << " module: " << mod << " phiModule: " << phiModule << std::endl;
-
-            if (mod % 2 != 0) { // inner stack
-                if (moduleIdMap.find(moduleId) == moduleIdMap.end() )
-                    moduleIdMap.insert(std::make_pair(moduleId, 0) );
-                else
-                    edm::LogError("NTupleStubs") << "Found duplicate: " << moduleId;
-            } else { // outer stack
-                if (moduleIdMap.find(moduleId) == moduleIdMap.end() )
-                    edm::LogError("NTupleStubs") << "Cannot find the inner stack paired with : " << moduleId;
-            }
-        }
-    }
-
-    std::map<uint32_t, uint32_t> moduleIdMap2;
-    StackedTrackerGeometry::StackContainerIterator stkIterator;
-    for(stkIterator = theStackedGeometry->stacks().begin(); stkIterator != theStackedGeometry->stacks().end(); ++stkIterator) {
-        DetId id0 = (**stkIterator).stackMember(0);
-        DetId id1 = (**stkIterator).stackMember(1);
-        uint32_t moduleId0 = getModuleId(id0);
-        uint32_t moduleId1 = getModuleId(id1);
-
-        if (!(*stkIterator)->Id().isBarrel() && !(*stkIterator)->Id().isEndcap())
-            edm::LogError("NTupleStubs") << "Neither barrel nor endcap: " << (*stkIterator)->Id();
-
-        if (moduleIdMap.find(moduleId0) == moduleIdMap.end() )
-            edm::LogError("NTupleStubs") << "stack id0 not found in theGeometry: " << moduleId0;
-
-        if (moduleIdMap2.find(moduleId0) == moduleIdMap2.end() )
-            moduleIdMap2.insert(std::make_pair(moduleId0, 0) );
-        else
-            edm::LogError("NTupleStubs") << "Found duplicate: " << moduleId0;
-
-        if (moduleId0 != moduleId1)
-            edm::LogError("NTupleStubs") << "ModuleId should be identical for: " << moduleId0 << ", " << moduleId1;
-
-        std::cout << moduleId0 << std::endl;
-    }
-    std::cout << "moduleIdMap size: " << moduleIdMap.size() << " moduleIdMap2 size: " << moduleIdMap2.size() << std::endl;
-    */
-
 }
 
 void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -517,8 +434,6 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     //std::auto_ptr<std::vector<bool> >                   vd_psmodule         (new std::vector<bool>());
     std::auto_ptr<std::vector<unsigned> >               vd_modId            (new std::vector<unsigned>());
     std::auto_ptr<std::vector<unsigned> >               vd_geoId            (new std::vector<unsigned>());
-    std::auto_ptr<std::vector<unsigned> >               vd_clusId           (new std::vector<unsigned>());
-    std::auto_ptr<std::vector<unsigned> >               vd_stubId           (new std::vector<unsigned>());
     //std::auto_ptr<std::vector<int> >                    vd_col              (new std::vector<int>());
     //std::auto_ptr<std::vector<int> >                    vd_row              (new std::vector<int>());
     std::auto_ptr<std::vector<int> >                    vd_adc              (new std::vector<int>());
@@ -784,7 +699,7 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
 
     /// TTStubs
-    if (pixelDigiTTStubs.isValid() && mcAssocTTStubs.isValid()) {
+    if (pixelDigiTTClusters.isValid() && pixelDigiTTStubs.isValid() && mcAssocTTStubs.isValid()) {
         edm::LogInfo("NTupleStubs") << "Size: " << pixelDigiTTStubs->size();
 
         typedef typename edmNew::DetSetVector<TTStub<Ref_PixelDigi_> >::const_iterator const_dsv_iter;
@@ -1146,18 +1061,6 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                     }
                 }
 
-                // Find clusId, stubId
-                unsigned clusId = findById(*vc_geoId, geoId.rawId(), false);
-                if (clusId == vc_geoId->size())
-                    clusId = 999999;
-                unsigned stubId = findById(*vb_geoId0, geoId.rawId(), false);
-                if (stubId == vb_geoId0->size()) {
-                    stubId = findById(*vb_geoId1, geoId.rawId(), false);
-                    if (stubId == vb_geoId1->size()) {
-                        stubId = 999999;
-                    }
-                }
-
                 vd_x->push_back(position.x());
                 vd_y->push_back(position.y());
                 vd_z->push_back(position.z());
@@ -1168,8 +1071,6 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                 //vd_psmodule->push_back(isPSModule);
                 vd_modId->push_back(moduleId);
                 vd_geoId->push_back(geoId.rawId());
-                vd_clusId->push_back(clusId);
-                vd_stubId->push_back(stubId);
                 //vd_col->push_back(col);
                 //vd_row->push_back(row);
                 vd_adc->push_back(adc);
@@ -1339,8 +1240,6 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     //iEvent.put(vd_psmodule      , prefixDigi_ + "psmodule"       + suffix_);
     iEvent.put(vd_modId         , prefixDigi_ + "modId"          + suffix_);
     iEvent.put(vd_geoId         , prefixDigi_ + "geoId"          + suffix_);
-    iEvent.put(vd_clusId        , prefixDigi_ + "clusId"         + suffix_);
-    iEvent.put(vd_stubId        , prefixDigi_ + "stubId"         + suffix_);
     //iEvent.put(vd_col           , prefixDigi_ + "col"            + suffix_);
     //iEvent.put(vd_row           , prefixDigi_ + "row"            + suffix_);
     iEvent.put(vd_adc           , prefixDigi_ + "adc"            + suffix_);
