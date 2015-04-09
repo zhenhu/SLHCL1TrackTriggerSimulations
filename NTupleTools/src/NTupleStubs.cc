@@ -40,64 +40,30 @@ unsigned findByRef(const edm::Handle<V>& handle, const edm::Ref<V,T>& ref) {
 }
 }
 
-uint32_t NTupleStubs::getModuleLayer(const DetId& id) {
+// _____________________________________________________________________________
+uint32_t ModuleIdFunctor::operator() (const DetId& id) const {
+    uint32_t layer  = 999999;
+    uint32_t ladder = 999999;
+    uint32_t module = 999999;
+
     if (id.subdetId() == (int) PixelSubdetector::PixelBarrel) {
         PXBDetId pxbId(id);
-        uint32_t layer  = pxbId.layer();
-        return layer;
+        layer  = pxbId.layer();
+        ladder = pxbId.ladder();
+        module = pxbId.module();
+
     } else if (id.subdetId() == (int) PixelSubdetector::PixelEndcap) {
         PXFDetId pxfId(id);
-        uint32_t side   = pxfId.side();
-        uint32_t disk   = pxfId.disk();
-        uint32_t layer  = (side == 2) ? disk : disk+7;
-        return layer;
-    } else {  // error
-        return 999999;
+        layer  = (pxfId.side() == 2) ? pxfId.disk() : pxfId.disk()+7;
+        ladder = pxfId.ring();
+        module = pxfId.module();
     }
-}
 
-uint32_t NTupleStubs::getModuleLadder(const DetId& id) {
-    if (id.subdetId() == (int) PixelSubdetector::PixelBarrel) {
-        PXBDetId pxbId(id);
-        uint32_t ladder = pxbId.ladder();
-        return ladder;
-    } else if (id.subdetId() == (int) PixelSubdetector::PixelEndcap) {
-        PXFDetId pxfId(id);
-        uint32_t ring   = pxfId.ring();
-        uint32_t blade  = pxfId.blade();
-        uint32_t panel  = pxfId.panel();
-        if(panel != 1 || ring != blade) {  // error
-            return 999999;
-        }
-        return ring;
-    } else {  // error
-        return 999999;
-    }
-}
-
-uint32_t NTupleStubs::getModuleModule(const DetId& id) {
-    if (id.subdetId() == (int) PixelSubdetector::PixelBarrel) {
-        PXBDetId pxbId(id);
-        uint32_t module = pxbId.module();
-        return module;
-    } else if (id.subdetId() == (int) PixelSubdetector::PixelEndcap) {
-        PXFDetId pxfId(id);
-        uint32_t module = pxfId.module();
-        return module;
-    } else {  // error
-        return 999999;
-    }
-}
-
-unsigned NTupleStubs::getModuleId(const DetId& id) {
-    uint32_t layer  = getModuleLayer(id);
-    uint32_t ladder = getModuleLadder(id);
-    uint32_t module = getModuleModule(id);
     assert(layer != 999999 && ladder != 999999 && module != 999999);
     return 10000*layer + 100*(ladder-1) + (module-1)/2;
 }
 
-
+// _____________________________________________________________________________
 NTupleStubs::NTupleStubs(const edm::ParameterSet& iConfig) :
   inputTagClus_        (iConfig.getParameter<edm::InputTag>("inputTagClus")),
   inputTagStub_        (iConfig.getParameter<edm::InputTag>("inputTagStub")),
@@ -119,8 +85,8 @@ NTupleStubs::NTupleStubs(const edm::ParameterSet& iConfig) :
     produces<std::vector<float> >                   (prefixClus_ + "r"              + suffix_);
     produces<std::vector<float> >                   (prefixClus_ + "eta"            + suffix_);
     produces<std::vector<float> >                   (prefixClus_ + "phi"            + suffix_);
-    produces<std::vector<float> >                   (prefixClus_ + "localx"         + suffix_);
-    produces<std::vector<float> >                   (prefixClus_ + "localy"         + suffix_);
+    //produces<std::vector<float> >                   (prefixClus_ + "localx"         + suffix_);
+    //produces<std::vector<float> >                   (prefixClus_ + "localy"         + suffix_);
     produces<std::vector<float> >                   (prefixClus_ + "coordx"         + suffix_);
     produces<std::vector<float> >                   (prefixClus_ + "coordy"         + suffix_);
     //produces<std::vector<float> >                   (prefixClus_ + "surfx"          + suffix_);
@@ -132,13 +98,6 @@ NTupleStubs::NTupleStubs(const edm::ParameterSet& iConfig) :
     //produces<std::vector<unsigned> >                (prefixClus_ + "iSide"          + suffix_);
     //produces<std::vector<unsigned> >                (prefixClus_ + "iPhi"           + suffix_);
     //produces<std::vector<unsigned> >                (prefixClus_ + "iZ"             + suffix_);
-    //produces<std::vector<unsigned> >                (prefixClus_ + "iModLayer"      + suffix_);
-    //produces<std::vector<unsigned> >                (prefixClus_ + "iModLadder"     + suffix_);
-    //produces<std::vector<unsigned> >                (prefixClus_ + "iModModule"     + suffix_);
-    //produces<std::vector<unsigned> >                (prefixClus_ + "iModCols"       + suffix_);
-    //produces<std::vector<unsigned> >                (prefixClus_ + "iModRows"       + suffix_);
-    //produces<std::vector<float> >                   (prefixClus_ + "iModPitchX"     + suffix_);
-    //produces<std::vector<float> >                   (prefixClus_ + "iModPitchY"     + suffix_);
     produces<std::vector<bool> >                    (prefixClus_ + "barrel"         + suffix_);
     produces<std::vector<bool> >                    (prefixClus_ + "psmodule"       + suffix_);
     produces<std::vector<bool> >                    (prefixClus_ + "stack"          + suffix_);
@@ -185,13 +144,6 @@ NTupleStubs::NTupleStubs(const edm::ParameterSet& iConfig) :
     //produces<std::vector<unsigned> >                (prefixStub_ + "iSide"          + suffix_);
     //produces<std::vector<unsigned> >                (prefixStub_ + "iPhi"           + suffix_);
     //produces<std::vector<unsigned> >                (prefixStub_ + "iZ"             + suffix_);
-    //produces<std::vector<unsigned> >                (prefixStub_ + "iModLayer"      + suffix_);
-    //produces<std::vector<unsigned> >                (prefixStub_ + "iModLadder"     + suffix_);
-    //produces<std::vector<unsigned> >                (prefixStub_ + "iModModule"     + suffix_);
-    //produces<std::vector<unsigned> >                (prefixStub_ + "iModCols"       + suffix_);
-    //produces<std::vector<unsigned> >                (prefixStub_ + "iModRows"       + suffix_);
-    //produces<std::vector<float> >                   (prefixStub_ + "iModPitchX"     + suffix_);
-    //produces<std::vector<float> >                   (prefixStub_ + "iModPitchY"     + suffix_);
     produces<std::vector<bool> >                    (prefixStub_ + "barrel"         + suffix_);
     produces<std::vector<bool> >                    (prefixStub_ + "psmodule"       + suffix_);
     produces<std::vector<unsigned> >                (prefixStub_ + "modId"          + suffix_);
@@ -284,6 +236,7 @@ void NTupleStubs::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) 
     edm::ESHandle<StackedTrackerGeometry> stackedGeometryHandle;
     iSetup.get<StackedTrackerGeometryRecord>().get(stackedGeometryHandle);
     theStackedGeometry = stackedGeometryHandle.product();
+    assert(theStackedGeometry->getCBC3MaxStubs() == 0);
 
     /// Magnetic field setup
     edm::ESHandle<MagneticField> magneticFieldHandle;
@@ -304,8 +257,8 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     std::auto_ptr<std::vector<float> >                  vc_r                (new std::vector<float>());
     std::auto_ptr<std::vector<float> >                  vc_eta              (new std::vector<float>());
     std::auto_ptr<std::vector<float> >                  vc_phi              (new std::vector<float>());
-    std::auto_ptr<std::vector<float> >                  vc_localx           (new std::vector<float>());
-    std::auto_ptr<std::vector<float> >                  vc_localy           (new std::vector<float>());
+    //std::auto_ptr<std::vector<float> >                  vc_localx           (new std::vector<float>());
+    //std::auto_ptr<std::vector<float> >                  vc_localy           (new std::vector<float>());
     std::auto_ptr<std::vector<float> >                  vc_coordx           (new std::vector<float>());
     std::auto_ptr<std::vector<float> >                  vc_coordy           (new std::vector<float>());
     //std::auto_ptr<std::vector<float> >                  vc_surfx            (new std::vector<float>());
@@ -317,13 +270,6 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     //std::auto_ptr<std::vector<unsigned> >               vc_iSide            (new std::vector<unsigned>());
     //std::auto_ptr<std::vector<unsigned> >               vc_iPhi             (new std::vector<unsigned>());
     //std::auto_ptr<std::vector<unsigned> >               vc_iZ               (new std::vector<unsigned>());
-    //std::auto_ptr<std::vector<unsigned> >               vc_iModLayer        (new std::vector<unsigned>());
-    //std::auto_ptr<std::vector<unsigned> >               vc_iModLadder       (new std::vector<unsigned>());
-    //std::auto_ptr<std::vector<unsigned> >               vc_iModModule       (new std::vector<unsigned>());
-    //std::auto_ptr<std::vector<unsigned> >               vc_iModCols         (new std::vector<unsigned>());
-    //std::auto_ptr<std::vector<unsigned> >               vc_iModRows         (new std::vector<unsigned>());
-    //std::auto_ptr<std::vector<float> >                  vc_iModPitchX       (new std::vector<float>());
-    //std::auto_ptr<std::vector<float> >                  vc_iModPitchY       (new std::vector<float>());
     std::auto_ptr<std::vector<bool> >                   vc_barrel           (new std::vector<bool>());
     std::auto_ptr<std::vector<bool> >                   vc_psmodule         (new std::vector<bool>());
     std::auto_ptr<std::vector<bool> >                   vc_stack            (new std::vector<bool>());
@@ -370,13 +316,6 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     //std::auto_ptr<std::vector<unsigned> >               vb_iSide            (new std::vector<unsigned>());
     //std::auto_ptr<std::vector<unsigned> >               vb_iPhi             (new std::vector<unsigned>());
     //std::auto_ptr<std::vector<unsigned> >               vb_iZ               (new std::vector<unsigned>());
-    //std::auto_ptr<std::vector<unsigned> >               vb_iModLayer        (new std::vector<unsigned>());
-    //std::auto_ptr<std::vector<unsigned> >               vb_iModLadder       (new std::vector<unsigned>());
-    //std::auto_ptr<std::vector<unsigned> >               vb_iModModule       (new std::vector<unsigned>());
-    //std::auto_ptr<std::vector<unsigned> >               vb_iModCols         (new std::vector<unsigned>());
-    //std::auto_ptr<std::vector<unsigned> >               vb_iModRows         (new std::vector<unsigned>());
-    //std::auto_ptr<std::vector<float> >                  vb_iModPitchX       (new std::vector<float>());
-    //std::auto_ptr<std::vector<float> >                  vb_iModPitchY       (new std::vector<float>());
     std::auto_ptr<std::vector<bool> >                   vb_barrel           (new std::vector<bool>());
     std::auto_ptr<std::vector<bool> >                   vb_psmodule         (new std::vector<bool>());
     std::auto_ptr<std::vector<unsigned> >               vb_modId            (new std::vector<unsigned>());
@@ -484,6 +423,7 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     if (inputTagDigi_.encode() != "")
         iEvent.getByLabel(inputTagDigi_, pixelDigiSimLinks);
 
+    ModuleIdFunctor getModuleId;
 
     //__________________________________________________________________________
     /// TTClusters
@@ -517,64 +457,65 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                 if (isBarrel == isEndcap) {
                     edm::LogError("NTupleClusters") << "Inconsistent detId with isBarrel: " << isBarrel << ", isEndcap: " << isEndcap;
                 }
+                unsigned stack = it->getStackMember();  // inner sensor=0, outer sensor=1
+                if (stack != 0 && stack != 1) {
+                    edm::LogError("NTupleClusters") << "Inconsistent stack number: " << stack;
+                }
 
                 /// Module ID
-                unsigned stack = it->getStackMember();  // inner sensor=0, outer sensor=1
-                unsigned width = it->findWidth();  // cluster width
                 const DetId geoId = theStackedGeometry->idToDet(detId, stack)->geographicalId();
-                //unsigned iModuleLayer = getModuleLayer(geoId);
-                //unsigned iModuleLadder = getModuleLadder(geoId);
-                //unsigned iModuleModule = getModuleModule(geoId);
                 unsigned moduleId = getModuleId(geoId);
 
                 /// Find pixel pitch and topology related information
-                //const GeomDetUnit* geoUnit = theStackedGeometry->idToDetUnit(detId, stack);
-                //const PixelGeomDetUnit* pixUnit = dynamic_cast<const PixelGeomDetUnit*>(geoUnit);
-                //const PixelTopology* pixTopo = dynamic_cast<const PixelTopology*>(&(pixUnit->specificTopology()) );
-                //const Bounds& bounds = pixUnit->specificSurface().bounds();
+                const GeomDetUnit* geoUnit = theStackedGeometry->idToDetUnit(detId, stack);
+                const PixelGeomDetUnit* pixUnit = dynamic_cast<const PixelGeomDetUnit*>(geoUnit);
+                const PixelTopology* pixTopo = dynamic_cast<const PixelTopology*>(&(pixUnit->specificTopology()) );
 
-                //uint32_t iModuleCols = pixTopo->ncolumns();  // like # subladders
-                //uint32_t iModuleRows = pixTopo->nrows();     // like # submodules
-                //uint32_t iModulePitchX = pixTopo->pitch().first;  // = width / nrows
-                //uint32_t iModulePitchY = pixTopo->pitch().second; // = length / ncols
-                //uint32_t iModuleROCsX = pixTopo->rocsX();
-                //uint32_t iModuleROCsY = pixTopo->rocsY();
-                //uint32_t iModuleColsPerROC = pixTopo->colsperroc();
-                //uint32_t iModuleRowsPerROC = pixTopo->rowsperroc();
+                uint32_t iModuleCols = pixTopo->ncolumns();  // like # subladders
+                uint32_t iModuleRows = pixTopo->nrows();     // like # submodules
+                uint32_t iModulePitchX = pixTopo->pitch().first;  // = width / nrows
+                uint32_t iModulePitchY = pixTopo->pitch().second; // = length / ncols
+                uint32_t iModuleROCsX = pixTopo->rocsX();
+                uint32_t iModuleROCsY = pixTopo->rocsY();
+                uint32_t iModuleColsPerROC = pixTopo->colsperroc();
+                uint32_t iModuleRowsPerROC = pixTopo->rowsperroc();
+
+                //const Bounds& bounds = pixUnit->specificSurface().bounds();
                 //float detThickness = bounds.thickness();
                 //float detLength = bounds.length();
                 //float detWidth = bounds.width();
                 //float detWidthAtHalfLength = bounds.widthAtHalfLength();
-                //if (isPSModule) {
-                //    if (stack == 0) {
-                //        if (!(iModuleCols == 32 && iModuleRows == 960))
-                //            edm::LogError("NTupleClusters") << "Inconsistent iModuleCols or iModuleRows: " << iModuleCols << ", " << iModuleRows << ", expected: 32, 960";
-                //        if (!(iModulePitchX == 0 && iModulePitchY == 0))
-                //            edm::LogError("NTupleClusters") << "Inconsistent iModulePitchX or iModulePitchY: " << iModulePitchX << ", " << iModulePitchY << ", expected: 0, 0";
-                //        if (!(iModuleROCsX == 4 && iModuleROCsY == 2))
-                //            edm::LogError("NTupleClusters") << "Inconsistent iModuleROCsX or iModuleROCsY: " << iModuleROCsX << ", " << iModuleROCsY << ", expected 4, 2";
-                //        if (!(iModuleColsPerROC == 16 && iModuleRowsPerROC == 240))
-                //            edm::LogError("NTupleClusters") << "Inconsistent iModuleColsPerROC or iModuleRowsPerROC: " << iModuleColsPerROC << ", " << iModuleRowsPerROC << ", expected 16, 240";
-                //    } else {
-                //        if (!(iModuleCols == 2 && iModuleRows == 960))
-                //            edm::LogError("NTupleClusters") << "Inconsistent iModuleCols or iModuleRows: " << iModuleCols << ", " << iModuleRows << ", expected: 2, 960";
-                //        if (!(iModulePitchX == 0 && iModulePitchY == 2))
-                //            edm::LogError("NTupleClusters") << "Inconsistent iModulePitchX or iModulePitchY: " << iModulePitchX << ", " << iModulePitchY << ", expected: 0, 2";
-                //        if (!(iModuleROCsX == 4 && iModuleROCsY == 2))
-                //            edm::LogError("NTupleClusters") << "Inconsistent iModuleROCsX or iModuleROCsY: " << iModuleROCsX << ", " << iModuleROCsY << ", expected 4, 2";
-                //        if (!(iModuleColsPerROC == 1 && iModuleRowsPerROC == 240))
-                //            edm::LogError("NTupleClusters") << "Inconsistent iModuleColsPerROC or iModuleRowsPerROC: " << iModuleColsPerROC << ", " << iModuleRowsPerROC << ", expected 1, 240";
-                //    }
-                //} else {
-                //    if (!(iModuleCols == 2 && iModuleRows == 1016))
-                //        edm::LogError("NTupleClusters") << "Inconsistent iModuleCols or iModuleRows: " << iModuleCols << ", " << iModuleRows << ", expected: 2, 1016";
-                //    if (!(iModulePitchX == 0 && iModulePitchY == 5))
-                //        edm::LogError("NTupleClusters") << "Inconsistent iModulePitchX or iModulePitchY: " << iModulePitchX << ", " << iModulePitchY << ", expected: 0, 5";
-                //    if (!(iModuleROCsX == 8 && iModuleROCsY == 2))
-                //        edm::LogError("NTupleClusters") << "Inconsistent iModuleROCsX or iModuleROCsY: " << iModuleROCsX << ", " << iModuleROCsY << ", expected 8, 2";
-                //    if (!(iModuleColsPerROC == 1 && iModuleRowsPerROC == 127))
-                //        edm::LogError("NTupleClusters") << "Inconsistent iModuleColsPerROC or iModuleRowsPerROC: " << iModuleColsPerROC << ", " << iModuleRowsPerROC << ", expected 1, 127";
-                //}
+
+                if (isPSModule) {
+                    if (stack == 0) {
+                        if (!(iModuleCols == 32 && iModuleRows == 960))
+                            edm::LogError("NTupleClusters") << "Inconsistent iModuleCols or iModuleRows: " << iModuleCols << ", " << iModuleRows << ", expected: 32, 960";
+                        if (!(iModulePitchX == 0 && iModulePitchY == 0))
+                            edm::LogError("NTupleClusters") << "Inconsistent iModulePitchX or iModulePitchY: " << iModulePitchX << ", " << iModulePitchY << ", expected: 0, 0";
+                        if (!(iModuleROCsX == 4 && iModuleROCsY == 2))
+                            edm::LogError("NTupleClusters") << "Inconsistent iModuleROCsX or iModuleROCsY: " << iModuleROCsX << ", " << iModuleROCsY << ", expected 4, 2";
+                        if (!(iModuleColsPerROC == 16 && iModuleRowsPerROC == 240))
+                            edm::LogError("NTupleClusters") << "Inconsistent iModuleColsPerROC or iModuleRowsPerROC: " << iModuleColsPerROC << ", " << iModuleRowsPerROC << ", expected 16, 240";
+                    } else {
+                        if (!(iModuleCols == 2 && iModuleRows == 960))
+                            edm::LogError("NTupleClusters") << "Inconsistent iModuleCols or iModuleRows: " << iModuleCols << ", " << iModuleRows << ", expected: 2, 960";
+                        if (!(iModulePitchX == 0 && iModulePitchY == 2))
+                            edm::LogError("NTupleClusters") << "Inconsistent iModulePitchX or iModulePitchY: " << iModulePitchX << ", " << iModulePitchY << ", expected: 0, 2";
+                        if (!(iModuleROCsX == 4 && iModuleROCsY == 2))
+                            edm::LogError("NTupleClusters") << "Inconsistent iModuleROCsX or iModuleROCsY: " << iModuleROCsX << ", " << iModuleROCsY << ", expected 4, 2";
+                        if (!(iModuleColsPerROC == 1 && iModuleRowsPerROC == 240))
+                            edm::LogError("NTupleClusters") << "Inconsistent iModuleColsPerROC or iModuleRowsPerROC: " << iModuleColsPerROC << ", " << iModuleRowsPerROC << ", expected 1, 240";
+                    }
+                } else {
+                    if (!(iModuleCols == 2 && iModuleRows == 1016))
+                        edm::LogError("NTupleClusters") << "Inconsistent iModuleCols or iModuleRows: " << iModuleCols << ", " << iModuleRows << ", expected: 2, 1016";
+                    if (!(iModulePitchX == 0 && iModulePitchY == 5))
+                        edm::LogError("NTupleClusters") << "Inconsistent iModulePitchX or iModulePitchY: " << iModulePitchX << ", " << iModulePitchY << ", expected: 0, 5";
+                    if (!(iModuleROCsX == 8 && iModuleROCsY == 2))
+                        edm::LogError("NTupleClusters") << "Inconsistent iModuleROCsX or iModuleROCsY: " << iModuleROCsX << ", " << iModuleROCsY << ", expected 8, 2";
+                    if (!(iModuleColsPerROC == 1 && iModuleRowsPerROC == 127))
+                        edm::LogError("NTupleClusters") << "Inconsistent iModuleColsPerROC or iModuleRowsPerROC: " << iModuleColsPerROC << ", " << iModuleRowsPerROC << ", expected 1, 127";
+                }
 
                 /// digis a.k.a. hits
                 //const std::vector<int>& hitCols = it->getCols();
@@ -607,7 +548,9 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                 const LocalPoint&  localposition = theStackedGeometry->findAverageLocalPosition(&(*it));
                 const GlobalPoint& position = theStackedGeometry->findAverageGlobalPosition(&(*it));
                 //const Surface::PositionType& surfposition = theStackedGeometry->idToDet(detId, stack)->position();
-                //const Surface::RotationType& surfsrotation = theStackedGeometry->idToDet(detId, stack)->rotation();
+                //const Surface::RotationType& surfrotation = theStackedGeometry->idToDet(detId, stack)->rotation();
+
+                unsigned width = it->findWidth();  // cluster width
 
                 edm::LogInfo("NTupleClusters") << "stackId: " << stackId << " iLayer: " << iLayer << " iRing: " << iRing << " iSide: " << iSide << " iPhi: " << iPhi << " iZ: " << iZ << " isBarrel: " << isBarrel << " geoId: " << geoId.rawId() << " moduleId: " << moduleId << " stack: " << stack << " width: " << width << " position: " << position << " localposition: " << localposition << " localcoord: " << localcoord;
 
@@ -617,26 +560,19 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                 vc_r->push_back(position.perp());
                 vc_eta->push_back(position.eta());
                 vc_phi->push_back(position.phi());
-                vc_localx->push_back(localposition.x());
-                vc_localy->push_back(localposition.y());
+                //vc_localx->push_back(localposition.x());
+                //vc_localy->push_back(localposition.y());
                 vc_coordx->push_back(localcoord.x());           // sviret/HL_LHC: CLUS_strip
                 vc_coordy->push_back(localcoord.y());           // sviret/HL_LHC: CLUS_seg
                 //vc_surfx->push_back(surfposition.x());
                 //vc_surfy->push_back(surfposition.y());
                 //vc_surfz->push_back(surfposition.z());
-                vc_stackId->push_back(stackId);  // this is stub raw Id
+                vc_stackId->push_back(stackId);
                 //vc_iLayer->push_back(iLayer);
                 //vc_iRing->push_back(iRing);
                 //vc_iSide->push_back(iSide);
                 //vc_iPhi->push_back(iPhi);
                 //vc_iZ->push_back(iZ);
-                //vc_iModLayer->push_back(iModuleLayer);          // sviret/HL_LHC: CLUS_layer
-                //vc_iModLadder->push_back(iModuleLadder);        // sviret/HL_LHC: CLUS_ladder
-                //vc_iModModule->push_back(iModuleModule);        // sviret/HL_LHC: CLUS_module
-                //vc_iModCols->push_back(iModuleCols);            // sviret/HL_LHC: CLUS_PS
-                //vc_iModRows->push_back(iModuleRows);            // sviret/HL_LHC: CLUS_nrows
-                //vc_iModPitchX->push_back(iModulePitchX);
-                //vc_iModPitchY->push_back(iModulePitchY);
                 vc_barrel->push_back(isBarrel);
                 vc_psmodule->push_back(isPSModule);
                 vc_stack->push_back(stack);  // convert to bool
@@ -744,60 +680,28 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                     edm::LogError("NTupleStubs") << "Inconsistent detId with isBarrel: " << isBarrel << ", isEndcap: " << isEndcap;
                 }
 
-                // Get the clusters (inner=0, outer=1)
+                /// Get the clusters (inner=0, outer=1)
                 const std::vector<clusreference>& clusterRefs = it->getClusterRefs();
                 if (clusterRefs.size() != 2) {
                     edm::LogError("NTupleStubs") << "# clusters != 2: " << clusterRefs.size();
                 }
-                //const DetId geoId0 = theStackedGeometry->idToDet(clusterRefs[0]->getDetId(), clusterRefs[0]->getStackMember())->geographicalId();
-                //const DetId geoId1 = theStackedGeometry->idToDet(clusterRefs[1]->getDetId(), clusterRefs[1]->getStackMember())->geographicalId();
                 const DetId geoId0 = theStackedGeometry->idToDet(detId, 0)->geographicalId();
                 const DetId geoId1 = theStackedGeometry->idToDet(detId, 1)->geographicalId();
 
-                // Get the cluster indices in this ntuple
+                /// Find the cluster indices in this ntuple
                 unsigned clusId0 = findByRef(pixelDigiTTClusters, clusterRefs[0]);
                 unsigned clusId1 = findByRef(pixelDigiTTClusters, clusterRefs[1]);
 
-                // For moduleId, we use the inner cluster (geoId0)
-                //unsigned iModuleLayer = getModuleLayer(geoId0);
-                //unsigned iModuleLadder = getModuleLadder(geoId0);
-                //unsigned iModuleModule = getModuleModule(geoId0);
-                unsigned moduleId = getModuleId(geoId0);
+                /// Module ID
+                unsigned moduleId = getModuleId(geoId0);  // using the inner cluster
 
-                const GeomDetUnit* geoUnit = theStackedGeometry->idToDetUnit(detId, 0);
-                const PixelGeomDetUnit* pixUnit = dynamic_cast<const PixelGeomDetUnit*>(geoUnit);
-                const PixelTopology* pixTopo = dynamic_cast<const PixelTopology*>(&(pixUnit->specificTopology()) );
-
-                uint32_t iModuleCols = pixTopo->ncolumns();  // like # subladders
-                uint32_t iModuleRows = pixTopo->nrows();     // like # submodules
-                uint32_t iModulePitchX = pixTopo->pitch().first;  // = width / nrows
-                uint32_t iModulePitchY = pixTopo->pitch().second; // = length / ncols
-                uint32_t iModuleROCsX = pixTopo->rocsX();
-                uint32_t iModuleROCsY = pixTopo->rocsY();
-                uint32_t iModuleRowsPerROC = pixTopo->rowsperroc();
-                uint32_t iModuleColsPerROC = pixTopo->colsperroc();
-                if (isPSModule) {
-                    if (!(iModuleCols == 32 && iModuleRows == 960))
-                        edm::LogError("NTupleStubs") << "Inconsistent iModuleCols or iModuleRows: " << iModuleCols << ", " << iModuleRows << ", expected: 32, 960";
-                    if (!(iModulePitchX == 0 && iModulePitchY == 0))
-                        edm::LogError("NTupleStubs") << "Inconsistent iModulePitchX or iModulePitchY: " << iModulePitchX << ", " << iModulePitchY << ", expected: 0, 0";
-                    if (!(iModuleROCsX == 4 && iModuleROCsY == 2))
-                        edm::LogError("NTupleStubs") << "Inconsistent iModuleROCsX or iModuleROCsY: " << iModuleROCsX << ", " << iModuleROCsY << ", expected 4, 2";
-                    if (!(iModuleColsPerROC == 16 && iModuleRowsPerROC == 240))
-                        edm::LogError("NTupleStubs") << "Inconsistent iModuleColsPerROC or iModuleRowsPerROC: " << iModuleColsPerROC << ", " << iModuleRowsPerROC << ", expected 16, 240";
-                } else {
-                    if (!(iModuleCols == 2 && iModuleRows == 1016))
-                        edm::LogError("NTupleStubs") << "Inconsistent iModuleCols or iModuleRows: " << iModuleCols << ", " << iModuleRows << ", expected: 2, 1016";
-                    if (!(iModulePitchX == 0 && iModulePitchY == 5))
-                        edm::LogError("NTupleStubs") << "Inconsistent iModulePitchX or iModulePitchY: " << iModulePitchX << ", " << iModulePitchY << ", expected: 0, 5";
-                    if (!(iModuleROCsX == 8 && iModuleROCsY == 2))
-                        edm::LogError("NTupleStubs") << "Inconsistent iModuleROCsX or iModuleROCsY: " << iModuleROCsX << ", " << iModuleROCsY << ", expected 8, 2";
-                    if (!(iModuleColsPerROC == 1 && iModuleRowsPerROC == 127))
-                        edm::LogError("NTupleStubs") << "Inconsistent iModuleColsPerROC or iModuleRowsPerROC: " << iModuleColsPerROC << ", " << iModuleRowsPerROC << ", expected 1, 127";
-                }
+                /// Find pixel pitch and topology related information
+                //const GeomDetUnit* geoUnit = theStackedGeometry->idToDetUnit(detId, 0);
+                //const PixelGeomDetUnit* pixUnit = dynamic_cast<const PixelGeomDetUnit*>(geoUnit);
+                //const PixelTopology* pixTopo = dynamic_cast<const PixelTopology*>(&(pixUnit->specificTopology()) );
 
                 /// digis a.k.a. hits
-                const clusreference& clusterRef = it->getClusterRef(0);  // bottom cluster
+                const clusreference& clusterRef = it->getClusterRef(0);  // using the inner cluster
                 //const DetId testgeoId0 = theStackedGeometry->idToDet(clusterRef->getDetId(), clusterRef->getStackMember())->geographicalId();
                 //assert(testgeoId0 == geoId0);
                 //const std::vector<int>& hitCols = clusterRef->getCols();
@@ -836,8 +740,8 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                 const float separation = (moduleId < 110000) ? surfposition1.perp() - surfposition0.perp() : ((moduleId < 180000) ? surfposition1.z() - surfposition0.z() : surfposition0.z() - surfposition1.z());
                 const MeasurementPoint& localcoord = clusterRef->findAverageLocalCoordinates();
 
-                unsigned clusWidth0 = clusterRefs[0]->findWidth();  // bottom cluster width
-                unsigned clusWidth1 = clusterRefs[1]->findWidth();  // top cluster width
+                unsigned clusWidth0 = clusterRefs[0]->findWidth();  // inner cluster width
+                unsigned clusWidth1 = clusterRefs[1]->findWidth();  // outer cluster width
 
                 edm::LogInfo("NTupleStubs") << "stackId: " << stackId << " iLayer: " << iLayer << " iRing: " << iRing << " iSide: " << iSide << " iPhi: " << iPhi << " iZ: " << iZ << " isBarrel: " << isBarrel << " roughPt: " << roughPt << " position: " << position << " direction: " << direction << " geoId0: " << geoId0.rawId() << " geoId1: " << geoId1.rawId() << " clusId0: " << clusId0 << " clusId1: " << clusId1 << " moduleId: " << moduleId;
 
@@ -859,13 +763,6 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                 //vb_iSide->push_back(iSide);
                 //vb_iPhi->push_back(iPhi);
                 //vb_iZ->push_back(iZ);
-                //vb_iModLayer->push_back(iModuleLayer);          // sviret/HL_LHC: STUB_layer
-                //vb_iModLadder->push_back(iModuleLadder);        // sviret/HL_LHC: STUB_ladder
-                //vb_iModModule->push_back(iModuleModule);        // sviret/HL_LHC: STUB_module
-                //vb_iModCols->push_back(iModuleCols);
-                //vb_iModRows->push_back(iModuleRows);
-                //vb_iModPitchX->push_back(iModulePitchX);
-                //vb_iModPitchY->push_back(iModulePitchY);
                 vb_barrel->push_back(isBarrel);
                 vb_psmodule->push_back(isPSModule);
                 vb_modId->push_back(moduleId);
@@ -1037,9 +934,7 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
             if (geomDetUnit->position().perp()<20.)
                 continue;  // only outer tracker
 
-            //unsigned iModuleLayer = getModuleLayer(geoId);
-            //unsigned iModuleLadder = getModuleLadder(geoId);
-            //unsigned iModuleModule = getModuleModule(geoId);
+            /// Module ID
             unsigned moduleId = getModuleId(geoId);
             edm::LogInfo("NTupleSimPixelDigis") << "rawId: " << geoId.rawId() << " det: " << det << " subdetId: " << subdetId << " modId: " << moduleId << " size: " << itv->size();
 
@@ -1107,8 +1002,8 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     iEvent.put(vc_r             , prefixClus_ + "r"              + suffix_);
     iEvent.put(vc_eta           , prefixClus_ + "eta"            + suffix_);
     iEvent.put(vc_phi           , prefixClus_ + "phi"            + suffix_);
-    iEvent.put(vc_localx        , prefixClus_ + "localx"         + suffix_);
-    iEvent.put(vc_localy        , prefixClus_ + "localy"         + suffix_);
+    //iEvent.put(vc_localx        , prefixClus_ + "localx"         + suffix_);
+    //iEvent.put(vc_localy        , prefixClus_ + "localy"         + suffix_);
     iEvent.put(vc_coordx        , prefixClus_ + "coordx"         + suffix_);
     iEvent.put(vc_coordy        , prefixClus_ + "coordy"         + suffix_);
     //iEvent.put(vc_surfx         , prefixClus_ + "surfx"          + suffix_);
@@ -1120,13 +1015,6 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     //iEvent.put(vc_iSide         , prefixClus_ + "iSide"          + suffix_);
     //iEvent.put(vc_iPhi          , prefixClus_ + "iPhi"           + suffix_);
     //iEvent.put(vc_iZ            , prefixClus_ + "iZ"             + suffix_);
-    //iEvent.put(vc_iModLayer     , prefixClus_ + "iModLayer"      + suffix_);
-    //iEvent.put(vc_iModLadder    , prefixClus_ + "iModLadder"     + suffix_);
-    //iEvent.put(vc_iModModule    , prefixClus_ + "iModModule"     + suffix_);
-    //iEvent.put(vc_iModCols      , prefixClus_ + "iModCols"       + suffix_);
-    //iEvent.put(vc_iModRows      , prefixClus_ + "iModRows"       + suffix_);
-    //iEvent.put(vc_iModPitchX    , prefixClus_ + "iModPitchX"     + suffix_);
-    //iEvent.put(vc_iModPitchY    , prefixClus_ + "iModPitchY"     + suffix_);
     iEvent.put(vc_barrel        , prefixClus_ + "barrel"         + suffix_);
     iEvent.put(vc_psmodule      , prefixClus_ + "psmodule"       + suffix_);
     iEvent.put(vc_stack         , prefixClus_ + "stack"          + suffix_);
@@ -1173,13 +1061,6 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     //iEvent.put(vb_iSide         , prefixStub_ + "iSide"          + suffix_);
     //iEvent.put(vb_iPhi          , prefixStub_ + "iPhi"           + suffix_);
     //iEvent.put(vb_iZ            , prefixStub_ + "iZ"             + suffix_);
-    //iEvent.put(vb_iModLayer     , prefixStub_ + "iModLayer"      + suffix_);
-    //iEvent.put(vb_iModLadder    , prefixStub_ + "iModLadder"     + suffix_);
-    //iEvent.put(vb_iModModule    , prefixStub_ + "iModModule"     + suffix_);
-    //iEvent.put(vb_iModCols      , prefixStub_ + "iModCols"       + suffix_);
-    //iEvent.put(vb_iModRows      , prefixStub_ + "iModRows"       + suffix_);
-    //iEvent.put(vb_iModPitchX    , prefixStub_ + "iModPitchX"     + suffix_);
-    //iEvent.put(vb_iModPitchY    , prefixStub_ + "iModPitchY"     + suffix_);
     iEvent.put(vb_barrel        , prefixStub_ + "barrel"         + suffix_);
     iEvent.put(vb_psmodule      , prefixStub_ + "psmodule"       + suffix_);
     iEvent.put(vb_modId         , prefixStub_ + "modId"          + suffix_);
