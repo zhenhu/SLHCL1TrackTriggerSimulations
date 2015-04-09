@@ -26,7 +26,6 @@ class NTupleStubs : public edm::EDProducer {
     virtual void beginRun(const edm::Run&, const edm::EventSetup&);
     virtual void endRun(const edm::Run&, const edm::EventSetup&) {}
 
-    unsigned findById(const std::vector<unsigned>& vec, unsigned id, bool throwError=true);
     unsigned getModuleLayer(const DetId& id);
     unsigned getModuleLadder(const DetId& id);
     unsigned getModuleModule(const DetId& id);

@@ -18,13 +18,26 @@
 #include "SimDataFormats/TrackerDigiSimLink/interface/PixelDigiSimLink.h"
 
 
-unsigned NTupleStubs::findById(const std::vector<unsigned>& vec, unsigned id, bool throwError) {
-    // FIXME: this doesn't guarantee exact match because there can be multiple stubs in one module
-    std::vector<unsigned>::const_iterator found;
-    found = std::find(vec.begin(), vec.end(), id);
-    if (found == vec.end() && throwError)
-        throw cms::Exception("LogicError") << "Id not found: " << id << ".\n";
-    return (found - vec.begin());
+namespace {
+template <class T, class U=edmNew::DetSet<T>, class V=edmNew::DetSetVector<T> >
+unsigned findByRef(const edm::Handle<V>& handle, const edm::Ref<V,T>& ref) {
+    bool found = false;
+    unsigned i=0, j=0;
+    for (typename V::const_iterator itv = handle->begin(); itv != handle->end(); ++itv, ++i) {
+        for (typename U::const_iterator it = itv->begin(); it != itv->end(); ++it, ++j) {
+            if (it->getDetId() == ref->getDetId() && it->getHits() == ref->getHits())
+                found = true;
+            if (found)
+                break;
+        }
+        if (found)
+            break;
+    }
+
+    if (i == handle->size())
+        throw cms::Exception("LogicError") << "findByRef: not found" << ".\n";
+    return j;
+}
 }
 
 uint32_t NTupleStubs::getModuleLayer(const DetId& id) {
@@ -705,6 +718,7 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
         typedef typename edmNew::DetSetVector<TTStub<Ref_PixelDigi_> >::const_iterator const_dsv_iter;
         typedef typename edmNew::DetSet      <TTStub<Ref_PixelDigi_> >::const_iterator const_ds_iter;
         typedef edm::Ref<edmNew::DetSetVector<TTStub<Ref_PixelDigi_> >, TTStub<Ref_PixelDigi_> > reference;
+        typedef edm::Ref<edmNew::DetSetVector<TTCluster<Ref_PixelDigi_> >, TTCluster<Ref_PixelDigi_> > clusreference;
 
         unsigned n = 0;
         for (const_dsv_iter itv = pixelDigiTTStubs->begin(); itv != pixelDigiTTStubs->end(); ++itv) {
@@ -731,7 +745,7 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                 }
 
                 // Get the clusters (inner=0, outer=1)
-                const std::vector<edm::Ref<edmNew::DetSetVector<TTCluster<Ref_PixelDigi_> >, TTCluster<Ref_PixelDigi_> > >& clusterRefs = it->getClusterRefs();
+                const std::vector<clusreference>& clusterRefs = it->getClusterRefs();
                 if (clusterRefs.size() != 2) {
                     edm::LogError("NTupleStubs") << "# clusters != 2: " << clusterRefs.size();
                 }
@@ -740,13 +754,9 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                 const DetId geoId0 = theStackedGeometry->idToDet(detId, 0)->geographicalId();
                 const DetId geoId1 = theStackedGeometry->idToDet(detId, 1)->geographicalId();
 
-
                 // Get the cluster indices in this ntuple
-                if (vc_geoId->empty()) {
-                    edm::LogError("NTupleStubs") << "TTClusters have not been filled!" << std::endl;
-                }
-                unsigned clusId0 = findById(*vc_geoId, geoId0.rawId());
-                unsigned clusId1 = findById(*vc_geoId, geoId1.rawId());
+                unsigned clusId0 = findByRef(pixelDigiTTClusters, clusterRefs[0]);
+                unsigned clusId1 = findByRef(pixelDigiTTClusters, clusterRefs[1]);
 
                 // For moduleId, we use the inner cluster (geoId0)
                 //unsigned iModuleLayer = getModuleLayer(geoId0);
@@ -787,7 +797,7 @@ void NTupleStubs::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
                 }
 
                 /// digis a.k.a. hits
-                const edm::Ref<edmNew::DetSetVector<TTCluster<Ref_PixelDigi_> >, TTCluster<Ref_PixelDigi_> >& clusterRef = it->getClusterRef(0);  // bottom cluster
+                const clusreference& clusterRef = it->getClusterRef(0);  // bottom cluster
                 //const DetId testgeoId0 = theStackedGeometry->idToDet(clusterRef->getDetId(), clusterRef->getStackMember())->geographicalId();
                 //assert(testgeoId0 == geoId0);
                 //const std::vector<int>& hitCols = clusterRef->getCols();
