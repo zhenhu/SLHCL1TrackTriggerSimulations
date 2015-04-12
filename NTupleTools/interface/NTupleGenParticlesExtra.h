@@ -25,6 +25,7 @@ class NTupleGenParticlesExtra : public edm::EDProducer {
     const MagneticField* theMagneticField;
 
     const edm::InputTag inputTag_;
+    const edm::InputTag inputTagBeamSpot_;
     const std::string   prefix_, suffix_;
 
     StringCutObjectSelector<reco::GenParticle> selector_;

@@ -6,6 +6,7 @@ from SLHCL1TrackTriggerSimulations.NTupleTools.BeamSpotFromSim_cfi import BeamSp
 ntupleGenParticlesExtra = cms.EDProducer('NTupleGenParticlesExtra',
     #inputTag = cms.InputTag('prunedGenParticles'),
     inputTag = cms.InputTag('genParticles'),
+    inputTagBeamSpot = cms.InputTag('BeamSpotFromSim', 'BeamSpot'),
     prefix = cms.string('genParts@'),
     suffix = cms.string(''),
     cut = cms.string(''),
