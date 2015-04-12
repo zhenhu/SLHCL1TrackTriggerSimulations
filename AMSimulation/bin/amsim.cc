@@ -1,6 +1,7 @@
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/StubCleaner.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/PatternGenerator.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/PatternMatcher.h"
+#include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/MatrixBuilder.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/TrackFitter.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/PatternAnalyzer.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/NTupleMaker.h"
@@ -31,12 +32,12 @@ int main(int argc, char **argv) {
     generic.add_options()
         ("version"             , "Print version")
         ("help,h"              , "Produce help message")
-        ("cleanStubs,C"        , "Clean stubs and pick one unique stub per layer")
-        ("generateBank,G"      , "Generate associative memory pattern bank")
+        ("stubCleaning,C"      , "Clean stubs and pick one unique stub per layer")
+        ("bankGeneration,B"    , "Generate associative memory pattern bank")
         ("patternRecognition,R", "Run associative memory pattern recognition")
+        ("matrixBuilding,M"    , "Calculate the matrix constants for PCA track fitting")
         ("trackFitting,T"      , "Perform track fitting")
-        ("analyzeBank,A"       , "Analyze associative memory pattern bank")
-        ("mergeBanks,M"        , "Merge associative memory pattern banks")
+        ("bankAnalysis,A"      , "Analyze associative memory pattern bank")
         ("write,W"             , "Write full ntuple")
         ("no-color"            , "Turn off colored text")
         ("timing"              , "Show timing information")
@@ -87,6 +88,9 @@ int main(int argc, char **argv) {
         ("maxStubs"     , po::value<int>(&option.maxStubs)->default_value(-1), "Specfiy max number of stubs per superstrip")
         ("maxRoads"     , po::value<int>(&option.maxRoads)->default_value(-1), "Specfiy max number of roads per event")
 
+        // Only for matrix building
+        ("hitbits"      , po::value<unsigned>(&option.hitbits)->default_value(0), "Specify hit bits")
+
         // Only for track fitting
         ("maxChi2"      , po::value<float>(&option.maxChi2)->default_value(999.), "Specify maximum reduced chi-squared")
         ("minNdof"      , po::value<int>(&option.minNdof)->default_value(1), "Specify minimum degree of freedom")
@@ -126,8 +130,14 @@ int main(int argc, char **argv) {
             std::cout << visible << std::endl;
             return EXIT_SUCCESS;
         }
-        ifstream ifs(vm["cfg"].as<std::string>().c_str());
-        po::store(po::parse_config_file(ifs, cfgfile_options), vm);
+
+        if (vm.count("cfg")) {
+            const std::vector<std::string>& cfgfiles = vm["cfg"].as<std::vector<std::string> >();
+            for (unsigned i=0; i<cfgfiles.size(); ++i) {
+                ifstream ifs(cfgfiles.at(i).c_str());
+                po::store(po::parse_config_file(ifs, cfgfile_options), vm);
+            }
+        }
 
         po::notify(vm);
     } catch (const boost::program_options::error& e) {
@@ -136,14 +146,14 @@ int main(int argc, char **argv) {
     }
 
     // At least one option needs to be called
-    if (!(vm.count("cleanStubs")         ||
-          vm.count("generateBank")       ||
+    if (!(vm.count("stubCleaning")       ||
+          vm.count("bankGeneration")     ||
           vm.count("patternRecognition") ||
+          vm.count("matrixBuilding")     ||
           vm.count("trackFitting")       ||
-          vm.count("analyzeBank")        ||
-          vm.count("mergeBanks")         ||
+          vm.count("bankAnalysis")       ||
           vm.count("write")              ) ) {
-        std::cout << "Must select one of '-C', '-G', '-R', '-T', '-A', '-M' or 'W'" << std::endl;
+        std::cout << "Must select one of '-C', '-B', '-R', '-M', '-T', '-A', or 'W'" << std::endl;
         std::cout << visible << std::endl;
         return 1;
     }
@@ -169,7 +179,7 @@ int main(int argc, char **argv) {
     // _________________________________________________________________________
     // Call the producers
 
-    if (vm.count("cleanStubs")) {
+    if (vm.count("stubCleaning")) {
         std::cout << Color("magenta") << "Start stub cleaning..." << EndColor() << std::endl;
 
         StubCleaner cleaner(option);
@@ -184,7 +194,7 @@ int main(int argc, char **argv) {
 
         std::cout << "Stub cleaning " << Color("lgreenb") << "DONE" << EndColor() << "." << std::endl;
 
-    } else if (vm.count("generateBank")) {
+    } else if (vm.count("bankGeneration")) {
         std::cout << Color("magenta") << "Start pattern bank generation..." << EndColor() << std::endl;
 
         PatternGenerator generator(option);
@@ -220,6 +230,18 @@ int main(int argc, char **argv) {
 
         std::cout << "Pattern recognition " << Color("lgreenb") << "DONE" << EndColor() << "." << std::endl;
 
+    } else if (vm.count("matrixBuilding")) {
+        std::cout << Color("magenta") << "Start matrix building..." << EndColor() << std::endl;
+
+        MatrixBuilder builder(option);
+        int exitcode = builder.run(option.input, option.datadir, option.output);
+        if (exitcode) {
+            std::cerr << "An error occurred during matrix building. Exiting." << std::endl;
+            return exitcode;
+        }
+
+        std::cout << "Matrix building " << Color("lgreenb") << "DONE" << EndColor() << "." << std::endl;
+
     } else if (vm.count("trackFitting")) {
         std::cout << Color("magenta") << "Start track fitting..." << EndColor() << std::endl;
 
@@ -237,7 +259,7 @@ int main(int argc, char **argv) {
 
         std::cout << "Track fitting " << Color("lgreenb") << "DONE" << EndColor() << "." << std::endl;
 
-    } else if (vm.count("analyzeBank")) {
+    } else if (vm.count("bankAnalysis")) {
         std::cout << Color("magenta") << "Start pattern bank analysis..." << EndColor() << std::endl;
 
         PatternAnalyzer analyzer(option);
@@ -253,10 +275,6 @@ int main(int argc, char **argv) {
         }
 
         std::cout << "Pattern bank analysis " << Color("lgreenb") << "DONE" << EndColor() << "." << std::endl;
-
-    } else if (vm.count("mergeBanks")) {
-        std::cerr << "NOT IMPLEMENTED" << std::endl;
-        return EXIT_FAILURE;
 
     } else if (vm.count("write")) {
         std::cout << Color("magenta") << "Start writing full ntuple..." << EndColor() << std::endl;

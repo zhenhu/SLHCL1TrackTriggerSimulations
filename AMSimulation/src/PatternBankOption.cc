@@ -47,6 +47,8 @@ std::ostream& operator<<(std::ostream& o, const PatternBankOption& po) {
       << "  maxStubs: "     << po.maxStubs
       << "  maxRoads: "     << po.maxRoads
 
+      << "  hitbits: "      << po.hitbits
+
       << "  maxChi2: "      << po.maxChi2
       << "  minNdof: "      << po.minNdof
       << "  maxCombs: "     << po.maxCombs

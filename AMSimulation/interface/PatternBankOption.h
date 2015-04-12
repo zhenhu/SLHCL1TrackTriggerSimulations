@@ -41,6 +41,8 @@ struct PatternBankOption {
     int         maxStubs;
     int         maxRoads;
 
+    unsigned    hitbits;
+
     float       maxChi2;
     int         minNdof;
     int         maxCombs;
