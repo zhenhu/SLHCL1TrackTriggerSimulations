@@ -2,7 +2,7 @@
 #define AMSimulation_TrackFitter_h_
 
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/Helper.h"
-#include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/PatternBankOption.h"
+#include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/ProgramOption.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/TrackFitterAlgoLinearized.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/TrackFitterAlgoATF.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/TrackFitterAlgoRetina.h"
@@ -13,7 +13,7 @@ class TrackFitter {
 
   public:
     // Constructor
-    TrackFitter(PatternBankOption po)
+    TrackFitter(ProgramOption po)
     : po_(po),
       prefixRoad_("AMTTRoads_"), prefixTrack_("AMTTTracks_"), suffix_(""),
       nEvents_(999999999), maxCombs_(999999999), maxTracks_(999999999),
@@ -56,7 +56,7 @@ class TrackFitter {
     int makeTracks(TString src, TString out);
 
     // Configurations
-    const PatternBankOption po_;
+    const ProgramOption po_;
     const TString prefixRoad_;
     const TString prefixTrack_;
     const TString suffix_;

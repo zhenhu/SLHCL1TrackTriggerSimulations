@@ -1,4 +1,4 @@
-#include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/PatternBankOption.h"
+#include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/ProgramOption.h"
 
 #include <iostream>
 #include <iterator>
@@ -13,7 +13,7 @@ std::ostream& operator<<(std::ostream& o, const std::vector<T>& v) {
     return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const PatternBankOption& po) {
+std::ostream& operator<<(std::ostream& o, const ProgramOption& po) {
     o << "verbose: "        << po.verbose
 
       << "  input: "        << po.input

@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     // Register the program options
 
     // Create a struct that holds all input arguments
-    PatternBankOption option;
+    ProgramOption option;
 
     // Declare a group of options that will be allowed only on command line
     namespace po = boost::program_options;
@@ -279,7 +279,7 @@ int main(int argc, char **argv) {
     } else if (vm.count("write")) {
         std::cout << Color("magenta") << "Start writing full ntuple..." << EndColor() << std::endl;
 
-        NTupleMaker writer;
+        NTupleMaker writer(option);
         //writer.setNEvents(maxEvents);
         //writer.setTrim(!notrim);
         //writer.setVerbosity(verbose);

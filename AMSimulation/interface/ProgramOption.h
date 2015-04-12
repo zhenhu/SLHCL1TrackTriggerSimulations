@@ -1,5 +1,5 @@
-#ifndef AMSimulation_PatternBankOption_h_
-#define AMSimulation_PatternBankOption_h_
+#ifndef AMSimulation_ProgramOption_h_
+#define AMSimulation_ProgramOption_h_
 
 #include <string>
 #include <vector>
@@ -7,7 +7,7 @@
 
 namespace slhcl1tt {
 
-struct PatternBankOption {
+struct ProgramOption {
     int         verbose;
 
     std::string input;
@@ -51,7 +51,7 @@ struct PatternBankOption {
     std::string datadir;
 };
 
-std::ostream& operator<<(std::ostream& o, const PatternBankOption& po);
+std::ostream& operator<<(std::ostream& o, const ProgramOption& po);
 
 }  // namespace slhcl1tt
 
