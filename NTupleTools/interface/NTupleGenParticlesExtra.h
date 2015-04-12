@@ -3,6 +3,9 @@
 
 #include "SLHCL1TrackTriggerSimulations/NTupleTools/interface/NTupleCommon.h"
 
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+
 
 namespace reco { class GenParticle; }
 
@@ -14,6 +17,12 @@ class NTupleGenParticlesExtra : public edm::EDProducer {
     //virtual void beginJob();
     virtual void produce(edm::Event&, const edm::EventSetup&);
     //virtual void endJob();
+
+    virtual void beginRun(const edm::Run&, const edm::EventSetup&);
+    virtual void endRun(const edm::Run&, const edm::EventSetup&) {}
+
+    // For event setup
+    const MagneticField* theMagneticField;
 
     const edm::InputTag inputTag_;
     const std::string   prefix_, suffix_;

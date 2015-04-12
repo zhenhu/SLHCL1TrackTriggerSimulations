@@ -3,6 +3,35 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "DataFormats/GeometryVector/interface/GlobalVector.h"
+#include "DataFormats/GeometryVector/interface/GlobalPoint.h"
+#include "TrackingTools/TrajectoryState/interface/FreeTrajectoryState.h"
+#include "TrackingTools/PatternTools/interface/TSCBLBuilderNoMaterial.h"
+#include "TrackingTools/PatternTools/interface/TSCPBuilderNoMaterial.h"
+
+
+namespace {
+// As defined in DataFormats/TrackReco/interface/TrackBase.h
+double get_dxy(const GlobalPoint& v, const GlobalVector& p) {
+    return (-v.x()*p.y() + v.y()*p.x()) / p.perp();
+    //return (-vx() * py() + vy() * px()) / pt();
+}
+
+double get_d0(const GlobalPoint& v, const GlobalVector& p) {
+    return -1.0 * get_dxy(v, p);
+}
+
+double get_dsz(const GlobalPoint& v, const GlobalVector& p) {
+    return v.z() * p.perp() / p.mag() - (v.x()*p.x() + v.y()*p.y()) / p.perp() * (p.z() / p.mag());
+    //return vz() * pt() / p() - (vx() * px() + vy() * py()) / pt() * pz() / p();
+}
+
+double get_dz(const GlobalPoint& v, const GlobalVector& p) {
+    return v.z() - (v.x()*p.x() + v.y()*p.y()) / p.perp() * (p.z() / p.perp());
+    //return vz() - (vx() * px() + vy() * py()) / pt() * (pz() / pt());
+}
+}
 
 NTupleGenParticlesExtra::NTupleGenParticlesExtra(const edm::ParameterSet& iConfig) :
   inputTag_(iConfig.getParameter<edm::InputTag>("inputTag")),
@@ -22,6 +51,13 @@ NTupleGenParticlesExtra::NTupleGenParticlesExtra(const edm::ParameterSet& iConfi
     produces<std::vector<float> > (prefix_ + "cotTheta" + suffix_);
     produces<std::vector<float> > (prefix_ + "d0"       + suffix_);
     produces<std::vector<float> > (prefix_ + "dz"       + suffix_);
+}
+
+void NTupleGenParticlesExtra::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {
+    /// Magnetic field setup
+    edm::ESHandle<MagneticField> magneticFieldHandle;
+    iSetup.get<IdealMagneticFieldRecord>().get(magneticFieldHandle);
+    theMagneticField = magneticFieldHandle.product();
 }
 
 void NTupleGenParticlesExtra::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
