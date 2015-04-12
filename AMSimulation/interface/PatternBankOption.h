@@ -8,28 +8,45 @@
 namespace slhcl1tt {
 
 struct PatternBankOption {
-    int verbose;
+    int         verbose;
 
-    std::string input, output, datadir, bankfile, roadfile, trackfile;
-    long long maxEvents;
-    int minFrequency, maxPatterns, maxMisses, maxStubs, maxRoads, maxCombs, maxTracks;
-    bool notrim;
+    std::string input;
+    std::string output;
+    std::string bankfile;
+    std::string matrixfile;
+    std::string roadfile;
+    std::string trackfile;
 
+    long long   maxEvents;
+    unsigned    nLayers;
+    unsigned    nFakers;
+    unsigned    nDCBits;
+
+    unsigned    tower;
     std::string superstrip;
-    float minPt;
-    float maxPt;
-    float minEta;  // not absolute eta
-    float maxEta;  // not absolute eta
-    float minPhi;  // from -pi to pi
-    float maxPhi;  // from -pi to pi
-    unsigned nLayers;
-    unsigned nFakers;
-    unsigned nDCBits;
-    unsigned tower;
-
     std::string algo;
-    float    maxChi2;
-    int      minNdof;
+
+    float       minPt;
+    float       maxPt;
+    float       minEta;
+    float       maxEta;
+    float       minPhi;
+    float       maxPhi;
+    float       minVz;
+    float       maxVz;
+
+    int         minFrequency;
+    long int    maxPatterns;
+    int         maxMisses;
+    int         maxStubs;
+    int         maxRoads;
+
+    float       maxChi2;
+    int         minNdof;
+    int         maxCombs;
+    int         maxTracks;
+
+    std::string datadir;
 };
 
 std::ostream& operator<<(std::ostream& o, const PatternBankOption& po);
