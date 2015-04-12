@@ -158,7 +158,8 @@ int StubCleaner::cleanStubs(TString src, TString out) {
         // Apply pt, eta, phi requirements
         bool sim = (po_.minPt  <= simPt  && simPt  <= po_.maxPt  &&
                     po_.minEta <= simEta && simEta <= po_.maxEta &&
-                    po_.minPhi <= simPhi && simPhi <= po_.maxPhi);
+                    po_.minPhi <= simPhi && simPhi <= po_.maxPhi &&
+                    po_.minVz  <= simVz  && simVz  <= po_.maxVz);
         if (!sim)
             keep = false;
 
@@ -346,11 +347,11 @@ int StubCleaner::cleanStubs(TString src, TString out) {
 
 // _____________________________________________________________________________
 // Main driver
-int StubCleaner::run(TString src, TString out) {
+int StubCleaner::run() {
     int exitcode = 0;
     Timing(1);
 
-    exitcode = cleanStubs(src, out);
+    exitcode = cleanStubs(po_.input, po_.output);
     if (exitcode)  return exitcode;
     Timing();
 

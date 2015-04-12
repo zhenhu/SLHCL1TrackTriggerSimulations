@@ -84,10 +84,10 @@ int main(int argc, char **argv) {
         ("minFrequency" , po::value<int>(&option.minFrequency)->default_value(1), "Specify min frequency of a pattern to be stored or read")
 
         // Only for pattern matching
-        ("maxPatterns"  , po::value<long int>(&option.maxPatterns)->default_value(-1), "Specfiy max number of patterns")
+        ("maxPatterns"  , po::value<long int>(&option.maxPatterns)->default_value(999999999), "Specfiy max number of patterns")
         ("maxMisses"    , po::value<int>(&option.maxMisses)->default_value(0), "Specify max number of allowed misses")
-        ("maxStubs"     , po::value<int>(&option.maxStubs)->default_value(-1), "Specfiy max number of stubs per superstrip")
-        ("maxRoads"     , po::value<int>(&option.maxRoads)->default_value(-1), "Specfiy max number of roads per event")
+        ("maxStubs"     , po::value<int>(&option.maxStubs)->default_value(999999999), "Specfiy max number of stubs per superstrip")
+        ("maxRoads"     , po::value<int>(&option.maxRoads)->default_value(999999999), "Specfiy max number of roads per event")
 
         // Only for matrix building
         ("hitbits"      , po::value<unsigned>(&option.hitbits)->default_value(0), "Specify hit bits")
@@ -95,8 +95,8 @@ int main(int argc, char **argv) {
         // Only for track fitting
         ("maxChi2"      , po::value<float>(&option.maxChi2)->default_value(999.), "Specify maximum reduced chi-squared")
         ("minNdof"      , po::value<int>(&option.minNdof)->default_value(1), "Specify minimum degree of freedom")
-        ("maxCombs"     , po::value<int>(&option.maxCombs)->default_value(-1), "Specfiy max number of combinations per road")
-        ("maxTracks"    , po::value<int>(&option.maxTracks)->default_value(-1), "Specfiy max number of tracks per event")
+        ("maxCombs"     , po::value<int>(&option.maxCombs)->default_value(999999999), "Specfiy max number of combinations per road")
+        ("maxTracks"    , po::value<int>(&option.maxTracks)->default_value(999999999), "Specfiy max number of tracks per event")
         ;
 
     // Hidden options, will be allowed both on command line and in config file,
