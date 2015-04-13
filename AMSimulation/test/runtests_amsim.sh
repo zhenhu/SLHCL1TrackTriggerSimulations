@@ -20,7 +20,7 @@ PYTHONTEST=${CMSSW_BASE}/src/SLHCL1TrackTriggerSimulations/AMSimulation/python/t
 (amsim -M -i stubs.root -o matrices.txt -n 100 --timing) || die 'Failure during matrix building' $?
 #WONTFIX# (python ${PYTHONTEST}/testMatrixBuilding.py ${LOCAL_TOP_DIR}/tracks.root) || die 'Failure using testMatrixBuilding.py' $?
 
-(amsim -T -i roads.root -o tracks.root -n 100 --timing) || die 'Failure during track fitting' $?
+(amsim -T -i roads.root -o tracks.root -m matrices.txt -n 100 --timing) || die 'Failure during track fitting' $?
 #WONTFIX# (python ${PYTHONTEST}/testTrackFitting.py ${LOCAL_TOP_DIR}/tracks.root) || die 'Failure using testTrackFitting.py' $?
 
 (amsim -A -i stubs.root -o attribs.root -b patternBank.root -n 100 --timing) || die 'Failure during pattern bank analysis' $?

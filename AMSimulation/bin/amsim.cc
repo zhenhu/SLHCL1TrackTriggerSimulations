@@ -181,7 +181,7 @@ int main(int argc, char **argv) {
     option.datadir += "/src/SLHCL1TrackTriggerSimulations/AMSimulation/data/";
 
     if (option.verbose>1)
-        std::cout << option << std::endl;
+        std::cout << option << std::endl << std::endl;
 
 
     // _________________________________________________________________________
