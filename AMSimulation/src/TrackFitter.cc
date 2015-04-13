@@ -288,6 +288,15 @@ int TrackFitter::makeTracks(TString src, TString out) {
 
     if (verbose_)  std::cout << Info() << Form("Read: %7ld, triggered: %7ld", nRead, nKept) << std::endl;
 
+
+    // _________________________________________________________________________
+    // Write histograms
+
+    for (std::map<TString, TH1F *>::const_iterator it=fitterPCA_->histograms.begin();
+         it!=fitterPCA_->histograms.end(); ++it) {
+        if (it->second)  it->second->SetDirectory(gDirectory);
+    }
+
     long long nentries = writer.writeTree();
     assert(nentries == nRead);
 

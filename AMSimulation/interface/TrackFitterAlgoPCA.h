@@ -5,14 +5,19 @@
 using namespace slhcl1tt;
 
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/external/Eigen/Core"
-#include "TString.h"
 
 
 class TrackFitterAlgoPCA : public TrackFitterAlgoBase {
   public:
-    TrackFitterAlgoPCA(bool fiveParameters=false) : TrackFitterAlgoBase(), fiveParameters_(fiveParameters) {}
+    TrackFitterAlgoPCA(bool fiveParameters=false)
+    : TrackFitterAlgoBase(), fiveParameters_(fiveParameters) {
+
+        bookHistograms();
+    }
 
     ~TrackFitterAlgoPCA() {}
+
+    int bookHistograms();
 
     int loadConstants(TString txt);
 

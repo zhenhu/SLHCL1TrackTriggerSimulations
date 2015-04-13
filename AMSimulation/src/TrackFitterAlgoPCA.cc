@@ -11,6 +11,31 @@ static const unsigned NPARAMETERS = 4;  // number of track parameters
 
 
 // _____________________________________________________________________________
+int TrackFitterAlgoPCA::bookHistograms() {
+    TH1::AddDirectory(kFALSE);
+    //TString hname;
+    //for (unsigned ivar=0; ivar<NVARIABLES; ++ivar) {
+    //    hname = Form("var%i", ivar);
+    //    histograms[hname] = new TH1F(hname, ";"+hname, 1000, -1., 1.);
+    //
+    //    hname = Form("pc%i", ivar);
+    //    histograms[hname] = new TH1F(hname, ";"+hname, 1000, -1., 1.);
+    //}
+    //
+    //TString parnames[NPARAMETERS] = {"phi", "cotTheta", "z0", "invPt"};
+    //for (unsigned ipar=0; ipar<NPARAMETERS; ++ipar) {
+    //    hname = Form("par%i", ipar);
+    //    histograms[hname] = new TH1F(hname, ";"+hname, 1000, -1., 1.);
+    //
+    //    hname = Form("errpar%i", ipar);
+    //    histograms[hname] = new TH1F(hname, ";"+hname, 1000, -0.01, 0.01);
+    //}
+
+    return 0;
+}
+
+
+// _____________________________________________________________________________
 int TrackFitterAlgoPCA::loadConstants(TString txt) {
     std::ifstream infile(txt.Data());
     if (!infile) {
@@ -57,7 +82,7 @@ int TrackFitterAlgoPCA::fit(const std::vector<TTHit>& hits, TTTrack2& track) {
     Eigen::VectorXd means = Eigen::VectorXd::Zero(NVARIABLES);
     for (unsigned i=0, ivar=0; i<hits.size(); ++i) {
         const TTHit& hit = hits.at(i);
-        variables(ivar++) = hit.phi;
+        variables(ivar++) = hit.r * hit.phi;
         variables(ivar++) = hit.z;
     }
 
