@@ -4,6 +4,9 @@
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/TrackFitterAlgoBase.h"
 using namespace slhcl1tt;
 
+#include "SLHCL1TrackTriggerSimulations/AMSimulation/external/Eigen/Core"
+#include "TString.h"
+
 
 class TrackFitterAlgoPCA : public TrackFitterAlgoBase {
   public:
@@ -11,10 +14,17 @@ class TrackFitterAlgoPCA : public TrackFitterAlgoBase {
 
     ~TrackFitterAlgoPCA() {}
 
+    int loadConstants(TString txt);
+
     int fit(const std::vector<TTHit>& hits, TTTrack2& track);
+
+    void print();
 
   private:
     bool fiveParameters_;
+    Eigen::MatrixXd D_;
+    Eigen::MatrixXd V_;
+    Eigen::MatrixXd DV_;
 };
 
 #endif

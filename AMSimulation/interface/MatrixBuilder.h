@@ -6,6 +6,8 @@
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/TriggerTowerMap.h"
 using namespace slhcl1tt;
 
+#include "SLHCL1TrackTriggerSimulations/AMSimulation/external/Eigen/Core"
+
 
 class MatrixBuilder {
   public:
@@ -45,6 +47,11 @@ class MatrixBuilder {
 
     // Operators
     TriggerTowerMap   * ttmap_;
+
+    // Matrices
+    Eigen::MatrixXd D_;
+    Eigen::MatrixXd V_;
+    Eigen::MatrixXd DV_;
 
 };
 

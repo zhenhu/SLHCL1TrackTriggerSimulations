@@ -4,9 +4,9 @@
 #include "SLHCL1TrackTriggerSimulations/AMSimulationDataFormats/interface/TTHit.h"
 //#include "SLHCL1TrackTriggerSimulations/AMSimulationDataFormats/interface/TTTrack.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulationDataFormats/interface/TTTrack2.h"
-using namespace slhcl1tt;
 
 #include <iosfwd>
+#include <string>
 #include <vector>
 
 

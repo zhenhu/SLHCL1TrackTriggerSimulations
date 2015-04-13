@@ -169,7 +169,8 @@ int MatrixBuilder::buildMatrices(TString src) {
     // Find matrix V
     // V is the orthogonal transformation from coordinates space to principal components space
     // The principal components are constraints + rotated track parameters
-    Eigen::MatrixXd V = (eigensolver.eigenvectors()).transpose();
+    V_ = Eigen::MatrixXd::Zero(NVARIABLES, NVARIABLES);
+    V_ = (eigensolver.eigenvectors()).transpose();
 
     if (verbose_) {
         std::cout << Info() << "sqrt(eigenvalues) of covariances: " << std::endl;
@@ -244,7 +245,7 @@ int MatrixBuilder::buildMatrices(TString src) {
 
         // Transform coordinates to principal components
         Eigen::VectorXd principals = Eigen::VectorXd::Zero(NVARIABLES);
-        principals = V * (variables - means);
+        principals = V_ * (variables - means);
 
         // Update mean vectors
         long int nTracks = nKept + 1;
@@ -286,25 +287,26 @@ int MatrixBuilder::buildMatrices(TString src) {
         std::cout << covariancesPV << std::endl << std::endl;
     }
 
-    // Find eigenvectors of covariance matrix
-    Eigen::MatrixXd D = Eigen::MatrixXd::Zero(NPARAMETERS, NVARIABLES);
 
     // Find matrix D
     // D is the transformation from principal components to track parameters
-    D = covariancesPV * covariancesV.inverse();
-    //D =(covariancesV.colPivHouseholderQr().solve(covariancesPV.transpose())).transpose();
+    D_ = Eigen::MatrixXd::Zero(NPARAMETERS, NVARIABLES);
+    //D_ = covariancesPV * covariancesV.inverse();
+    D_ = (covariancesV.colPivHouseholderQr().solve(covariancesPV.transpose())).transpose();
 
-    Eigen::MatrixXd DV = Eigen::MatrixXd::Zero(NPARAMETERS, NVARIABLES);
-    DV = D * V;
+    DV_ = Eigen::MatrixXd::Zero(NPARAMETERS, NVARIABLES);
+    DV_ = D_ * V_;
 
     if (verbose_) {
+        std::cout << Info() << "The matrices are: " << std::endl;
         std::ios::fmtflags flags = std::cout.flags();
-        std::cout << Info() << "matrix V: " << std::endl;
-        std::cout << std::setprecision(4) << V << std::endl << std::endl;
-        std::cout << Info() << "matrix D: " << std::endl;
-        std::cout << D << std::endl << std::endl;
-        std::cout << Info() << "matrix DV: " << std::endl;
-        std::cout << DV << std::endl << std::endl;
+        std::cout << std::setprecision(4);
+        std::cout << "V: " << std::endl;
+        std::cout << V_ << std::endl << std::endl;
+        std::cout << "D: " << std::endl;
+        std::cout << D_ << std::endl << std::endl;
+        std::cout << "DV: " << std::endl;
+        std::cout << DV_ << std::endl << std::endl;
         std::cout.flags(flags);
     }
 
@@ -374,10 +376,10 @@ int MatrixBuilder::buildMatrices(TString src) {
         }
 
         Eigen::VectorXd principals = Eigen::VectorXd::Zero(NVARIABLES);
-        principals = V * (variables - means);
+        principals = V_ * (variables - means);
 
         Eigen::VectorXd parameters_fit = Eigen::VectorXd::Zero(NPARAMETERS);
-        parameters_fit = DV * (variables - means);
+        parameters_fit = DV_ * (variables - means);
 
         for (unsigned ivar=0; ivar<NVARIABLES; ++ivar) {
             statV.at(ivar).fill(principals(ivar));
@@ -399,20 +401,6 @@ int MatrixBuilder::buildMatrices(TString src) {
         }
     }
 
-    // FIXME: move to writeMatrices()
-    std::string out = po_.output;
-    std::ofstream outfile(out.c_str());
-    if (!outfile) {
-        std::cerr << Error() << "Unable to open " << out << std::endl;
-        return 1;
-    }
-
-    outfile << V;
-    outfile << std::endl << std::endl;
-    outfile << D;
-    outfile << std::endl;
-    outfile.close();
-
     return 0;
 }
 
@@ -420,6 +408,17 @@ int MatrixBuilder::buildMatrices(TString src) {
 // _____________________________________________________________________________
 // Write matrices
 int MatrixBuilder::writeMatrices(TString out) {
+    std::ofstream outfile(out.Data());
+    if (!outfile) {
+        std::cout << Error() << "Unable to open " << out << std::endl;
+        return 1;
+    }
+
+    outfile << V_;
+    outfile << std::endl << std::endl;
+    outfile << D_;
+    outfile << std::endl << std::endl;
+    outfile.close();
 
     return 0;
 }

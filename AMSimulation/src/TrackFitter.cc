@@ -91,7 +91,7 @@ int TrackFitter::makeTracks(TString src, TString out) {
         tracks.clear();
         int fitstatus = 0;
 
-        if (po_.algo=="RET") {
+        if (po_.algo == "RET") {
             // _________________________________________________________________
             // Track fitters taking the entire road
 
@@ -178,7 +178,7 @@ int TrackFitter::makeTracks(TString src, TString out) {
 
             }  // loop over the roads
 
-        } else if (po_.algo=="ATF4" || po_.algo=="ATF5" || po_.algo=="PCA4" || po_.algo=="PCA5") {
+        } else if (po_.algo == "ATF4" || po_.algo == "ATF5" || po_.algo == "PCA4" || po_.algo == "PCA5") {
             // _________________________________________________________________
             // Track fitters taking fit combinations
 
@@ -286,6 +286,12 @@ int TrackFitter::makeTracks(TString src, TString out) {
 int TrackFitter::run() {
     int exitcode = 0;
     Timing(1);
+
+    if (po_.algo == "PCA4" || po_.algo == "PCA5") {
+        exitcode = fitterPCA_ -> loadConstants(po_.matrixfile);
+        if (exitcode)  return exitcode;
+        Timing();
+    }
 
     exitcode = makeTracks(po_.input, po_.output);
     if (exitcode)  return exitcode;
