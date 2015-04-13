@@ -143,20 +143,21 @@ int main(int argc, char **argv) {
         po::notify(vm);
     } catch (const boost::program_options::error& e) {
         std::cerr << e.what() << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    // At least one option needs to be called
-    if (!(vm.count("stubCleaning")       ||
-          vm.count("bankGeneration")     ||
-          vm.count("patternRecognition") ||
-          vm.count("matrixBuilding")     ||
-          vm.count("trackFitting")       ||
-          vm.count("bankAnalysis")       ||
-          vm.count("write")              ) ) {
-        std::cout << "Must select one of '-C', '-B', '-R', '-M', '-T', '-A', or 'W'" << std::endl;
-        std::cout << visible << std::endl;
-        return 1;
+    // Exactly one of these options must be selected
+    int vmcount = vm.count("stubCleaning")       +
+                  vm.count("bankGeneration")     +
+                  vm.count("patternRecognition") +
+                  vm.count("matrixBuilding")     +
+                  vm.count("trackFitting")       +
+                  vm.count("bankAnalysis")       +
+                  vm.count("write")              ;
+    if (vmcount != 1) {
+        std::cerr << "ERROR: Must select exactly one of '-C', '-B', '-R', '-M', '-T', '-A', or 'W'" << std::endl;
+        //std::cout << visible << std::endl;
+        return EXIT_FAILURE;
     }
 
     if (vm.count("no-color")) {
@@ -178,6 +179,9 @@ int main(int argc, char **argv) {
     // Add options
     option.datadir = std::getenv("CMSSW_BASE");
     option.datadir += "/src/SLHCL1TrackTriggerSimulations/AMSimulation/data/";
+
+    if (option.verbose>1)
+        std::cout << option << std::endl;
 
 
     // _________________________________________________________________________
