@@ -165,6 +165,11 @@ int MatrixBuilder::buildMatrices(TString src) {
 
     // Find eigenvectors of covariance matrix
     Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(covariances);
+    sqrtEigenvalues_ = Eigen::VectorXd::Zero(NVARIABLES);
+    sqrtEigenvalues_ = eigensolver.eigenvalues();
+    for (unsigned ivar=0; ivar<NVARIABLES; ++ivar) {
+        sqrtEigenvalues_(ivar) = std::sqrt(sqrtEigenvalues_(ivar));  // take the square root
+    }
 
     // Find matrix V
     // V is the orthogonal transformation from coordinates space to principal components space
@@ -172,11 +177,11 @@ int MatrixBuilder::buildMatrices(TString src) {
     V_ = Eigen::MatrixXd::Zero(NVARIABLES, NVARIABLES);
     V_ = (eigensolver.eigenvectors()).transpose();
 
-    if (verbose_) {
+    if (verbose_>1) {
         std::cout << Info() << "sqrt(eigenvalues) of covariances: " << std::endl;
-        std::cout << eigensolver.eigenvalues() << std::endl << std::endl;
+        std::cout << sqrtEigenvalues_ << std::endl << std::endl;
         std::cout << Info() << "eigenvectors^T:: " << std::endl;
-        std::cout << eigensolver.eigenvectors().transpose() << std::endl << std::endl;
+        std::cout << V_ << std::endl << std::endl;
     }
 
 
@@ -213,7 +218,7 @@ int MatrixBuilder::buildMatrices(TString src) {
 
         // Loop over reconstructed stubs
         for (unsigned istub=0, ivar=0; istub<nstubs; ++istub) {
-            float    stub_r   = reader.vb_r       ->at(istub);
+            //float    stub_r   = reader.vb_r       ->at(istub);
             float    stub_phi = reader.vb_phi     ->at(istub);
             float    stub_z   = reader.vb_z       ->at(istub);
 
@@ -345,7 +350,7 @@ int MatrixBuilder::buildMatrices(TString src) {
 
         // Loop over reconstructed stubs
         for (unsigned istub=0, ivar=0; istub<nstubs; ++istub) {
-            float    stub_r   = reader.vb_r       ->at(istub);
+            //float    stub_r   = reader.vb_r       ->at(istub);
             float    stub_phi = reader.vb_phi     ->at(istub);
             float    stub_z   = reader.vb_z       ->at(istub);
 
@@ -414,6 +419,8 @@ int MatrixBuilder::writeMatrices(TString out) {
         return 1;
     }
 
+    outfile << sqrtEigenvalues_;
+    outfile << std::endl << std::endl;
     outfile << V_;
     outfile << std::endl << std::endl;
     outfile << D_;

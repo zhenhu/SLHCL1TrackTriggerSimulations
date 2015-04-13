@@ -22,6 +22,7 @@ class TrackFitterAlgoPCA : public TrackFitterAlgoBase {
 
   private:
     bool fiveParameters_;
+    Eigen::VectorXd sqrtEigenvalues_;
     Eigen::MatrixXd D_;
     Eigen::MatrixXd V_;
     Eigen::MatrixXd DV_;
