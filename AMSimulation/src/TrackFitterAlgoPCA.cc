@@ -106,6 +106,13 @@ int TrackFitterAlgoPCA::fit(const std::vector<TTHit>& hits, TTTrack2& track) {
 
     track.setTrackParams(rinv, phi0, cottheta0, z0, d0, chi2, ndof, 0., 0.);
 
+    std::vector<float> principals_vec;
+    for (unsigned ivar=0; ivar<NVARIABLES; ++ivar) {
+        principals_vec.push_back(principals(ivar));
+    }
+
+    track.setPrincipals(principals_vec);
+
     return 0;
 }
 
