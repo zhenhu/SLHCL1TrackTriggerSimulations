@@ -136,6 +136,7 @@ int PatternGenerator::makePatterns(TString src) {
 
         // _____________________________________________________________________
         // Start generating patterns
+
         patt.fill(0);
 
         // Loop over reconstructed stubs

@@ -167,7 +167,10 @@ int main(int argc, char **argv) {
         slhcl1tt::ShowTiming();
     }
 
-    // Restrict the integer ranges
+    // Update options
+    if (option.maxEvents < 0)
+        option.maxEvents = std::numeric_limits<long long>::max();
+
     option.nLayers = std::min(std::max(3u, option.nLayers), 8u);
     option.nFakers = std::min(std::max(0u, option.nFakers), 3u);
     option.nDCBits = std::min(std::max(0u, option.nDCBits), 4u);
