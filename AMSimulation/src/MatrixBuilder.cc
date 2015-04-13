@@ -156,15 +156,19 @@ int MatrixBuilder::buildMatrices(TString src) {
 
     if (verbose_)  std::cout << Info() << Form("Read: %7ld, kept: %7ld", nRead, nKept) << std::endl;
 
-    if (verbose_) {
+    if (verbose_>1) {
         std::cout << Info() << "means: " << std::endl;
         std::cout << means << std::endl << std::endl;
         std::cout << Info() << "covariances: " << std::endl;
         std::cout << covariances << std::endl << std::endl;
     }
 
-    // Find eigenvectors
+    // Find eigenvectors of covariance matrix
     Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(covariances);
+
+    // Find matrix V
+    // V is the orthogonal transformation from coordinates space to principal components space
+    // The principal components are constraints + rotated track parameters
     Eigen::MatrixXd V = (eigensolver.eigenvectors()).transpose();
 
     if (verbose_) {
@@ -180,7 +184,7 @@ int MatrixBuilder::buildMatrices(TString src) {
 
     if (verbose_)  std::cout << Info() << "Begin second loop on tracks" << std::endl;
 
-    // Mean vector and covariance matrix
+    // Mean vector and covariance matrix for principal components and track parameters
     Eigen::VectorXd meansV = Eigen::VectorXd::Zero(NVARIABLES);
     Eigen::VectorXd meansP = Eigen::VectorXd::Zero(NPARAMETERS);
     Eigen::MatrixXd covariancesV = Eigen::MatrixXd::Zero(NVARIABLES, NVARIABLES);
@@ -282,10 +286,13 @@ int MatrixBuilder::buildMatrices(TString src) {
         std::cout << covariancesPV << std::endl << std::endl;
     }
 
-    // Find eigenvectors
+    // Find eigenvectors of covariance matrix
     Eigen::MatrixXd D = Eigen::MatrixXd::Zero(NPARAMETERS, NVARIABLES);
-    //D = covariancesPV * covariancesV.inverse();
-    D =(covariancesV.colPivHouseholderQr().solve(covariancesPV.transpose())).transpose();
+
+    // Find matrix D
+    // D is the transformation from principal components to track parameters
+    D = covariancesPV * covariancesV.inverse();
+    //D =(covariancesV.colPivHouseholderQr().solve(covariancesPV.transpose())).transpose();
 
     Eigen::MatrixXd DV = Eigen::MatrixXd::Zero(NPARAMETERS, NVARIABLES);
     DV = D * V;
