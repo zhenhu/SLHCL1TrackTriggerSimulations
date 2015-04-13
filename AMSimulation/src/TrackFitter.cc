@@ -41,6 +41,20 @@ std::vector<std::vector<T> > arrangeCombinations(const std::vector<std::vector<T
 }
 }
 
+int TrackFitter::loadConstants(TString txt) {
+    if (po_.algo == "PCA4" || po_.algo == "PCA5") {
+        if (fitterPCA_ -> loadConstants(txt)) {
+            return 1;
+        }
+        if (verbose_) {
+            std::cout << Info() << "The matrices are: " << std::endl;
+            fitterPCA_ -> print();
+        }
+    }
+
+    return 0;
+}
+
 
 // _____________________________________________________________________________
 // Do track fitting
@@ -287,11 +301,9 @@ int TrackFitter::run() {
     int exitcode = 0;
     Timing(1);
 
-    if (po_.algo == "PCA4" || po_.algo == "PCA5") {
-        exitcode = fitterPCA_ -> loadConstants(po_.matrixfile);
-        if (exitcode)  return exitcode;
-        Timing();
-    }
+    exitcode = loadConstants(po_.matrixfile);
+    if (exitcode)  return exitcode;
+    Timing();
 
     exitcode = makeTracks(po_.input, po_.output);
     if (exitcode)  return exitcode;

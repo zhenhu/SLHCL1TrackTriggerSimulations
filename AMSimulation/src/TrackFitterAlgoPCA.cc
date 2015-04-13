@@ -33,7 +33,7 @@ int TrackFitterAlgoPCA::loadConstants(TString txt) {
         }
     }
 
-    D_ = Eigen::MatrixXd::Zero(NVARIABLES, NPARAMETERS);
+    D_ = Eigen::MatrixXd::Zero(NPARAMETERS, NVARIABLES);
     for (unsigned ipar=0; ipar<NPARAMETERS; ++ipar) {
         for (unsigned jvar=0; jvar<NVARIABLES; ++jvar) {
             infile >> x;
@@ -88,6 +88,8 @@ int TrackFitterAlgoPCA::fit(const std::vector<TTHit>& hits, TTTrack2& track) {
 void TrackFitterAlgoPCA::print() {
     std::ios::fmtflags flags = std::cout.flags();
     std::cout << std::setprecision(4);
+    std::cout << "sqrtEigenvalues: " << std::endl;
+    std::cout << sqrtEigenvalues_ << std::endl << std::endl;
     std::cout << "V: " << std::endl;
     std::cout << V_ << std::endl << std::endl;
     std::cout << "D: " << std::endl;
