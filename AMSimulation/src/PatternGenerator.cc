@@ -175,6 +175,11 @@ int PatternGenerator::makePatterns(TString src) {
         ++nRead;
     }
 
+    if (nRead == 0) {
+        std::cout << Error() << "Failed to read any event." << std::endl;
+        return 1;
+    }
+
     if (verbose_)  std::cout << Info() << Form("Read: %7ld, kept: %7ld, # patterns: %7lu, coverage: %7.5f", nRead, nKept, patternBank_map_.size(), coverage) << std::endl;
 
     // Save these numbers
