@@ -126,7 +126,7 @@ int MatrixBuilder::buildMatrices(TString src) {
             float    stub_phi = reader.vb_phi     ->at(istub);
             float    stub_z   = reader.vb_z       ->at(istub);
 
-            variables(ivar++) = stub_r * stub_phi;
+            variables(ivar++) = stub_phi;
             variables(ivar++) = stub_z;
 
             if (verbose_>2) {
@@ -231,7 +231,7 @@ int MatrixBuilder::buildMatrices(TString src) {
             float    stub_phi = reader.vb_phi     ->at(istub);
             float    stub_z   = reader.vb_z       ->at(istub);
 
-            variables(ivar++) = stub_r * stub_phi;
+            variables(ivar++) = stub_phi;
             variables(ivar++) = stub_z;
         }
 
@@ -367,7 +367,7 @@ int MatrixBuilder::buildMatrices(TString src) {
             float    stub_phi = reader.vb_phi     ->at(istub);
             float    stub_z   = reader.vb_z       ->at(istub);
 
-            variables(ivar++) = stub_r * stub_phi;
+            variables(ivar++) = stub_phi;
             variables(ivar++) = stub_z;
         }
 

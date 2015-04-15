@@ -87,7 +87,7 @@ int TrackFitterAlgoPCA::fit(const std::vector<TTHit>& hits, TTTrack2& track) {
     Eigen::VectorXd variables = Eigen::VectorXd::Zero(NVARIABLES);
     for (unsigned i=0, ivar=0; i<hits.size(); ++i) {
         const TTHit& hit = hits.at(i);
-        variables(ivar++) = hit.r * hit.phi;
+        variables(ivar++) = hit.phi;
         variables(ivar++) = hit.z;
     }
 
