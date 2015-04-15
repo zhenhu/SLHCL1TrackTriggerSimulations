@@ -251,7 +251,7 @@ int MatrixBuilder::buildMatrices(TString src) {
 
         // Transform coordinates to principal components
         Eigen::VectorXd principals = Eigen::VectorXd::Zero(nvariables_);
-        principals = V_ * (variables - means);
+        principals = V_ * (variables - shifts_);
 
         // Update mean vectors
         long int nTracks = nKept + 1;
@@ -387,10 +387,10 @@ int MatrixBuilder::buildMatrices(TString src) {
         }
 
         Eigen::VectorXd principals = Eigen::VectorXd::Zero(nvariables_);
-        principals = V_ * (variables - means);
+        principals = V_ * (variables - shifts_);
 
         Eigen::VectorXd parameters_fit = Eigen::VectorXd::Zero(nparameters_);
-        parameters_fit = DV_ * (variables - means);
+        parameters_fit = DV_ * (variables - shifts_);
 
         for (unsigned ivar=0; ivar<nvariables_; ++ivar) {
             statV.at(ivar).fill(principals(ivar));
@@ -405,6 +405,8 @@ int MatrixBuilder::buildMatrices(TString src) {
     }
 
     if (verbose_>1) {
+        std::ios::fmtflags flags = std::cout.flags();
+        std::cout << std::setprecision(4);
         std::cout << Info() << "statV: " << std::endl;
         for (unsigned ivar=0; ivar<nvariables_; ++ivar) {
             std::cout << "principal " << ivar << ": " << statV.at(ivar).getEntries() << " " << statV.at(ivar).getMean() << " " << statV.at(ivar).getSigma() << std::endl;
@@ -413,6 +415,7 @@ int MatrixBuilder::buildMatrices(TString src) {
         for (unsigned ipar=0; ipar<nparameters_; ++ipar) {
             std::cout << "parameter " << ipar << ": " << statP.at(ipar).getEntries() << " " << statP.at(ipar).getMean() << " " << statP.at(ipar).getSigma() << std::endl;
         }
+        std::cout.flags(flags);
     }
 
     return 0;

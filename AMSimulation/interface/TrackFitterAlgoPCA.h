@@ -56,6 +56,8 @@ class TrackFitterAlgoPCA : public TrackFitterAlgoBase {
 
     int fit(const std::vector<TTHit>& hits, TTTrack2& track);
 
+    unsigned nvariables()   const { return nvariables_; }
+    unsigned nparameters()  const { return nparameters_; }
     void print();
 
   private:

@@ -107,8 +107,8 @@ int TrackFitterAlgoPCA::fit(const std::vector<TTHit>& hits, TTTrack2& track) {
 
     double rinv = 0.003 * 3.8 * parameters_fit(3);
     double phi0 = parameters_fit(0);
-    double cottheta0 = parameters_fit(0);
-    double z0 = parameters_fit(0);
+    double cottheta0 = parameters_fit(1);
+    double z0 = parameters_fit(2);
     double d0 = 0.;
 
     track.setTrackParams(rinv, phi0, cottheta0, z0, d0, chi2, ndof, 0., 0.);
@@ -127,6 +127,8 @@ int TrackFitterAlgoPCA::fit(const std::vector<TTHit>& hits, TTTrack2& track) {
 void TrackFitterAlgoPCA::print() {
     std::ios::fmtflags flags = std::cout.flags();
     std::cout << std::setprecision(4);
+    std::cout << "shifts: " << std::endl;
+    std::cout << shifts_ << std::endl << std::endl;
     std::cout << "sqrtEigenvalues: " << std::endl;
     std::cout << sqrtEigenvalues_ << std::endl << std::endl;
     std::cout << "V: " << std::endl;
