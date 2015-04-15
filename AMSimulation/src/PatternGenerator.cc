@@ -3,8 +3,6 @@
 #include "SLHCL1TrackTriggerSimulations/AMSimulationIO/interface/PatternBankReader.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulationIO/interface/TTStubReader.h"
 
-static const unsigned MIN_NGOODSTUBS = 3;
-static const unsigned MAX_NGOODSTUBS = 8;
 static const unsigned MAX_FREQUENCY = 0xffffffff;  // unsigned
 
 namespace {
@@ -101,16 +99,6 @@ int PatternGenerator::makePatterns(TString src) {
 
         const unsigned nstubs = reader.vb_modId->size();
         if (verbose_>2)  std::cout << Debug() << "... evt: " << ievt << " # stubs: " << nstubs << std::endl;
-
-        if (nstubs < MIN_NGOODSTUBS) {  // skip if not enough stubs
-            ++nRead;
-            continue;
-        }
-
-        if (nstubs > MAX_NGOODSTUBS) {
-            std::cout << Error() << "Too many stubs: " << nstubs << std::endl;
-            return 1;
-        }
 
         // Apply track pt requirement
         float simPt = reader.vp_pt->front();
