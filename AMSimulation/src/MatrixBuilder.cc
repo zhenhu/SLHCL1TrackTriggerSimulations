@@ -168,6 +168,10 @@ int MatrixBuilder::buildMatrices(TString src) {
         std::cout << covariances << std::endl << std::endl;
     }
 
+    // Find shifts
+    shifts_ = Eigen::VectorXd::Zero(NVARIABLES);
+    shifts_ = means;
+
     // Find eigenvectors of covariance matrix
     Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(covariances);
     sqrtEigenvalues_ = Eigen::VectorXd::Zero(NVARIABLES);
@@ -311,6 +315,8 @@ int MatrixBuilder::buildMatrices(TString src) {
         std::cout << Info() << "The matrices are: " << std::endl;
         std::ios::fmtflags flags = std::cout.flags();
         std::cout << std::setprecision(4);
+        std::cout << "shifts: " << std::endl;
+        std::cout << shifts_ << std::endl << std::endl;
         std::cout << "sqrtEigenvalues: " << std::endl;
         std::cout << sqrtEigenvalues_ << std::endl << std::endl;
         std::cout << "V: " << std::endl;
@@ -426,6 +432,8 @@ int MatrixBuilder::writeMatrices(TString out) {
         return 1;
     }
 
+    outfile << shifts_;
+    outfile << std::endl << std::endl;
     outfile << sqrtEigenvalues_;
     outfile << std::endl << std::endl;
     outfile << V_;
