@@ -12,8 +12,10 @@ using namespace slhcl1tt;
 class TrackFitterAlgoPCA : public TrackFitterAlgoBase {
   public:
     TrackFitterAlgoPCA(const slhcl1tt::ProgramOption& po)
-    : TrackFitterAlgoBase() {
+    : TrackFitterAlgoBase(),
+      view_(PCA_3D), hitbits_(PCA_ALLHIT), nvariables_(12), nparameters_(4) {
 
+        // Setup
         if (po.view == "XYZ" || po.view == "3D")
             view_ = PCA_3D;
         else if (po.view == "XY" || po.view == "RPHI")
@@ -21,12 +23,26 @@ class TrackFitterAlgoPCA : public TrackFitterAlgoBase {
         else if (po.view == "RZ")
             view_ = PCA_RZ;
 
-        if (po.algo == "PCA4")
-            fiveParams_ = false;
-        else
-            fiveParams_ = true;
-
         hitbits_ = static_cast<PCA_HitBits>(po.hitbits);
+
+        if (po.algo == "PCA4")
+            nparameters_ = 4;
+        else if (po.algo == "PCA5")
+            nparameters_ = 5;
+
+        if (view_ == PCA_3D) {
+            if (hitbits_ == PCA_ALLHIT) {
+                nvariables_ = 6 * 2;
+            } else {
+                nvariables_ = (6-1) * 2;
+            }
+        } else {
+            if (hitbits_ == PCA_ALLHIT) {
+                nvariables_ = 6 * 1;
+            } else {
+                nvariables_ = (6-1) * 1;
+            }
+        }
 
         // Book histograms
         bookHistograms();
@@ -44,9 +60,10 @@ class TrackFitterAlgoPCA : public TrackFitterAlgoBase {
 
   private:
     // Settings
-    bool fiveParams_;
     PCA_FitView view_;
     PCA_HitBits hitbits_;
+    unsigned nvariables_;   // number of hit coordinates or principal components
+    unsigned nparameters_;  // number of track parameters
 
     // Matrices
     Eigen::VectorXd shifts_;
