@@ -41,18 +41,6 @@ int TrackFitterAlgoPCA::loadConstants(TString txt) {
     }
 
     double x;
-    shifts_ = Eigen::VectorXd::Zero(nvariables_);
-    for (unsigned ivar=0; ivar<nvariables_; ++ivar) {
-        infile >> x;
-        shifts_(ivar) = x;
-    }
-
-    sqrtEigenvalues_ = Eigen::VectorXd::Zero(nvariables_);
-    for (unsigned ivar=0; ivar<nvariables_; ++ivar) {
-        infile >> x;
-        sqrtEigenvalues_(ivar) = x;
-    }
-
     V_ = Eigen::MatrixXd::Zero(nvariables_, nvariables_);
     for (unsigned ivar=0; ivar<nvariables_; ++ivar) {
         for (unsigned jvar=0; jvar<nvariables_; ++jvar) {
@@ -71,6 +59,24 @@ int TrackFitterAlgoPCA::loadConstants(TString txt) {
 
     DV_ = Eigen::MatrixXd::Zero(nparameters_, nvariables_);
     DV_ = D_ * V_;
+
+    meansV_ = Eigen::VectorXd::Zero(nvariables_);
+    for (unsigned ivar=0; ivar<nvariables_; ++ivar) {
+        infile >> x;
+        meansV_(ivar) = x;
+    }
+
+    meansP_ = Eigen::VectorXd::Zero(nparameters_);
+    for (unsigned ipar=0; ipar<nparameters_; ++ipar) {
+        infile >> x;
+        meansP_(ipar) = x;
+    }
+
+    sqrtEigenvalues_ = Eigen::VectorXd::Zero(nvariables_);
+    for (unsigned ivar=0; ivar<nvariables_; ++ivar) {
+        infile >> x;
+        sqrtEigenvalues_(ivar) = x;
+    }
 
     return 0;
 }
@@ -94,10 +100,12 @@ int TrackFitterAlgoPCA::fit(const std::vector<TTHit>& hits, TTTrack2& track) {
     variables << variables1, variables2;
 
     Eigen::VectorXd principals = Eigen::VectorXd::Zero(nvariables_);
-    principals = V_ * (variables - shifts_);
+    principals = V_ * variables;
+    //principals -= meansV_;
 
     Eigen::VectorXd parameters_fit = Eigen::VectorXd::Zero(nparameters_);
-    parameters_fit = DV_ * (variables - shifts_);
+    parameters_fit = DV_ * variables;
+    //parameters_fit -= meansP_;
 
     unsigned ndof = nvariables_ - nparameters_;
     double chi2 = 0.;
@@ -127,15 +135,15 @@ int TrackFitterAlgoPCA::fit(const std::vector<TTHit>& hits, TTTrack2& track) {
 void TrackFitterAlgoPCA::print() {
     std::ios::fmtflags flags = std::cout.flags();
     std::cout << std::setprecision(4);
-    std::cout << "shifts: " << std::endl;
-    std::cout << shifts_ << std::endl << std::endl;
-    std::cout << "sqrtEigenvalues: " << std::endl;
-    std::cout << sqrtEigenvalues_ << std::endl << std::endl;
     std::cout << "V: " << std::endl;
     std::cout << V_ << std::endl << std::endl;
     std::cout << "D: " << std::endl;
     std::cout << D_ << std::endl << std::endl;
-    std::cout << "DV: " << std::endl;
-    std::cout << DV_ << std::endl << std::endl;
+    std::cout << "meansV: " << std::endl;
+    std::cout << meansV_ << std::endl << std::endl;
+    std::cout << "meansP: " << std::endl;
+    std::cout << meansP_ << std::endl << std::endl;
+    std::cout << "sqrtEigenvalues: " << std::endl;
+    std::cout << sqrtEigenvalues_ << std::endl << std::endl;
     std::cout.flags(flags);
 }

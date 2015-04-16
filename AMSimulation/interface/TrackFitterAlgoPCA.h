@@ -68,8 +68,9 @@ class TrackFitterAlgoPCA : public TrackFitterAlgoBase {
     unsigned nparameters_;  // number of track parameters
 
     // Matrices
-    Eigen::VectorXd shifts_;
     Eigen::VectorXd sqrtEigenvalues_;
+    Eigen::VectorXd meansV_;
+    Eigen::VectorXd meansP_;
     Eigen::MatrixXd D_;
     Eigen::MatrixXd V_;
     Eigen::MatrixXd DV_;
