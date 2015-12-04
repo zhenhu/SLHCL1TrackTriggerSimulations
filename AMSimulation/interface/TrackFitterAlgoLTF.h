@@ -13,10 +13,10 @@ namespace slhcl1tt {
 class TrackFitterAlgoLTF : public TrackFitterAlgoBase {
    public:
   TrackFitterAlgoLTF(const slhcl1tt::ProgramOption& po) :
-      TrackFitterAlgoBase(),
-      linearizedTrackFitter_(std::make_shared<LinearizedTrackFitter>("LinearizedTrackFit/LinearizedTrackFit/python/ConstantsProduction/", true)),
-      verbose_(po.verbose)
-    {}
+    TrackFitterAlgoBase(),
+    linearizedTrackFitter_(std::make_shared<LinearizedTrackFitter>("LinearizedTrackFit/LinearizedTrackFit/python/ConstantsProduction/", true, true)),
+    verbose_(po.verbose)
+  {}
 
     ~TrackFitterAlgoLTF() {}
 
