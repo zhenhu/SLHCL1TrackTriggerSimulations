@@ -43,8 +43,8 @@ def drawer_book(options):
     hname = prefix + "vz"
     histos[hname] = TEfficiency(hname, "; v_{z} [cm]; %s" % ytitle,  120, -30, 30)
 
-    hname = prefix + "charge"
-    histos[hname] = TEfficiency(hname, "; charge; %s" % ytitle,      5, -2.5, 2.5)
+#     hname = prefix + "charge"
+#     histos[hname] = TEfficiency(hname, "; charge; %s" % ytitle,      5, -2.5, 2.5)
 
     prefix = "resolution_"
     xtitle = "p_{T} resolution / p_{T}"
@@ -137,7 +137,8 @@ def drawer_project(tree, histos, options):
     for ievt, evt in enumerate(tree):
         if (ievt == options.nentries):  break
 
-        if (ievt % 100 == 0):  print "Processing event: %i" % ievt
+        if   (ievt % 1000 == 0               ):  print "Processing event: %i" % ievt
+        elif (ievt %  100 == 0 and options.pu):  print "Processing event: %i" % ievt
 
         nparts_all = evt.trkParts_primary.size()
         trkparts = {}
@@ -223,7 +224,7 @@ def drawer_project(tree, histos, options):
                 histos[prefix + "phi"     ].Fill(trigger, phi)
             if options.ptmin < pt < options.ptmax and options.etamin < eta < options.etamax and options.phimin < phi < options.phimax:
                 histos[prefix + "vz"      ].Fill(trigger, vz)
-                histos[prefix + "charge"  ].Fill(trigger, charge)
+#                 histos[prefix + "charge"  ].Fill(trigger, charge)
 
             if trigger:
                 track_pt, track_eta = trkparts_trigger_vars[k]
@@ -347,7 +348,7 @@ def drawer_draw(histos, options):
             gr2.Draw("p")
 
         CMS_label()
-        save(options.outdir, "%s_%s" % (hname, options.ss), dot_root=True, additional=h.additional)
+        save(options.outdir, "%s_%s" % (hname, options.outstring), dot_root=False, dot_pdf=False, additional=h.additional)
     return
 
 
@@ -397,6 +398,7 @@ if __name__ == '__main__':
     parser.add_argument("--maxChi2", type=float, default=5, help="max reduced chi-squared (default: %(default)s)")
     parser.add_argument("--low-stat", action="store_true", help="low statistics (default: %(default)s)")
     parser.add_argument("--low-low-stat", action="store_true", help="low low statistics (default: %(default)s)")
+    parser.add_argument("--outstring", type=str, help="string for output file labelling (default: %(default)s)")
 
     # Parse default arguments
     options = parser.parse_args()
