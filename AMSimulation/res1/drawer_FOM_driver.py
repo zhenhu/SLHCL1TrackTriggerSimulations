@@ -3,7 +3,7 @@
 import subprocess
 from rootdrawing import *
 from parser import *
-from drawer_perf_mu_resolution import main as main_muReso
+from drawer_perf_mu_factEff import main as main_muReso
 
 # ______________________________________________________________________________
 # Main function
