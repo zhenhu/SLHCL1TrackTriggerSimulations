@@ -57,13 +57,13 @@ def drawer_book(options):
     ytitle = "#varepsilon_{AM PR}"
     for i in xrange(3):
         hname = (prefix + "pt_%i") % i
-        histos[hname] = TEfficiency(hname, "; p_{T} [GeV]; %s" % ytitle, 100, 0., 500.)
+        histos[hname] = TEfficiency(hname, "; p_{T} [GeV]; %s" % ytitle, 50, 0., 500.)
 
         hname = (prefix + "ppt_%i") % i  # pt, but zoomed in to 0-50 GeV
-        histos[hname] = TEfficiency(hname, "; p_{T} [GeV]; %s" % ytitle, 100, 0., 50.)
+        histos[hname] = TEfficiency(hname, "; p_{T} [GeV]; %s" % ytitle, 50, 0., 50.)
 
         hname = (prefix + "pppt_%i") % i  # pt, but zoomed in to 0-10 GeV
-        histos[hname] = TEfficiency(hname, "; p_{T} [GeV]; %s" % ytitle, 100, 0., 10.)
+        histos[hname] = TEfficiency(hname, "; p_{T} [GeV]; %s" % ytitle, 50, 0., 10.)
 
         hname = (prefix + "eta_%i") % i
         histos[hname] = TEfficiency(hname, "; #eta; %s" % ytitle,        120, -3.0, 3.0)
@@ -363,7 +363,7 @@ if __name__ == '__main__':
     parser.add_argument("ss", help="short name of superstrip definition (e.g. ss256)")
     parser.add_argument("npatterns", type=int, help="number of patterns to reach the desired coverage")
     parser.add_argument("--coverage", type=float, default=0.95, help="desired coverage (default: %(default)s)")
-    parser.add_argument("--minPt", type=float, default=2, help="min pT (default: %(default)s)")
+    parser.add_argument("--minPt", type=float, default=3, help="min pT (default: %(default)s)")
 
     # Parse default arguments
     options = parser.parse_args()

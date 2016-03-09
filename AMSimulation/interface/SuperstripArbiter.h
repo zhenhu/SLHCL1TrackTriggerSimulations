@@ -10,7 +10,7 @@
 
 namespace slhcl1tt {
 
-enum SuperstripType {UNKNOWN, FIXEDWIDTH, PROJECTIVE, FOUNTAIN};
+  enum SuperstripType {UNKNOWN, FIXEDWIDTH, PROJECTIVE, FOUNTAIN, FOUNTAINOPT};
 
 class SuperstripArbiter {
   public:
@@ -64,6 +64,7 @@ class SuperstripArbiter {
     unsigned           fountain_max_nx_;
     std::vector<float> fountain_phiBins_;
     std::vector<float> fountain_zBins_;
+    float              fountainopt_pt_;
 
     // Trigger tower geometry
     // modules_[i][j] is the module ID of the i-th layer, j-th module
@@ -77,9 +78,14 @@ class SuperstripArbiter {
     std::vector<float> phiMaxs_;
     std::vector<float> zMins_;
     std::vector<float> zMaxs_;
+    std::vector<float> fountain_xfactor_;
+
 
     // phiWidths[i] is the phiWidth of the i-th layer
     std::vector<float> phiWidths_;
+    // Optimized analytical phiWidths[i] is the phiWidth of the i-th layer (based on PCA constants)
+    std::vector<float> phiWidths_opt_lowpt_;
+    std::vector<float> phiWidths_opt_highpt_;
 
     // rMeans[i] is the mean radius of the i-th layer (barrel only)
     std::vector<float> rMeans_;

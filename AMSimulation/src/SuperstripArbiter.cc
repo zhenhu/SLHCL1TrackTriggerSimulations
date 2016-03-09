@@ -57,6 +57,20 @@ SuperstripArbiter::SuperstripArbiter()
     };
     assert(phiWidths_.size() == 16);
 
+    phiWidths_opt_lowpt_ = {
+        0.01091, 0.00518, 0.00409, 0.00309, 0.00275, 0.00571,
+        9.99999, 9.99999, 9.99999, 9.99999, 9.99999,
+        9.99999, 9.99999, 9.99999, 9.99999, 9.99999
+    };
+    assert(phiWidths_opt_lowpt_.size() == 16);
+
+    phiWidths_opt_highpt_ = {
+        0.01079, 0.00612, 0.00439, 0.00330, 0.00260, 0.00450,
+        9.99999, 9.99999, 9.99999, 9.99999, 9.99999,
+        9.99999, 9.99999, 9.99999, 9.99999, 9.99999
+    };
+    assert(phiWidths_opt_highpt_.size() == 16);
+
     // Average radii [cm] in the 6 barrel layers
     rMeans_ = {
         22.5913, 35.4772, 50.5402, 68.3101, 88.5002, 107.71
@@ -89,14 +103,24 @@ void SuperstripArbiter::setDefinition(TString definition, unsigned tt, const Tri
         TString token1 = definition(0,2);
         TString token2 = definition(2,pos-2);
         TString token3 = definition(pos+1,2);
-        TString token4 = definition(pos+3,len-(pos+3));
+	// TString token4 = definition(pos+3,len-(pos+3));
+        TString token4 = definition(pos+3,1);
+	
+	TString token5, token6;
 
+	unsigned posL5 = definition.Index("L5x");
+	if (posL5>0) token5  = definition(posL5+3,1);
+	unsigned posL10 = definition.Index("L10x");
+	if (posL10>0) token6  = definition(posL10+4,1);
+	
         if (token1 == "ss") {
             sstype_ = SuperstripType::FIXEDWIDTH;
         } else if (token1 == "nx") {
             sstype_ = SuperstripType::PROJECTIVE;
         } else if (token1 == "sf") {
             sstype_ = SuperstripType::FOUNTAIN;
+        } else if (token1 == "op") {
+            sstype_ = SuperstripType::FOUNTAINOPT;
         } else {
             throw std::invalid_argument("Incorrect superstrip definition.");
         }
@@ -121,6 +145,20 @@ void SuperstripArbiter::setDefinition(TString definition, unsigned tt, const Tri
             throw std::invalid_argument("Incorrect superstrip definition.");
         }
         float token4f = token4.Atof();
+
+	if (token5.IsFloat()) {
+            // Do nothing
+        } else {
+	  token5="1";
+        }
+        float token5f = token5.Atof();
+
+	if (token6.IsFloat()) {
+            // Do nothing
+        } else {
+	  token6="1";
+        }
+        float token6f = token6.Atof();
 
         switch (sstype_) {
         case SuperstripType::FIXEDWIDTH:
@@ -147,8 +185,23 @@ void SuperstripArbiter::setDefinition(TString definition, unsigned tt, const Tri
             fountain_sf_    = token2f;
             fountain_nz_    = token4f;
             useGlobalCoord_ = true;
+	    fountain_xfactor_ .push_back( token5f );
+	    fountain_xfactor_ .push_back( 1 );
+	    fountain_xfactor_ .push_back( 1 );
+	    fountain_xfactor_ .push_back( 1 );
+	    fountain_xfactor_ .push_back( 1 );
+	    fountain_xfactor_ .push_back( token6f );
 
             if (fountain_sf_ <= 0. || fountain_nz_ == 0)
+                throw std::invalid_argument("Incorrect fountain superstrip definition.");
+            break;
+
+	case SuperstripType::FOUNTAINOPT:
+            fountainopt_pt_ = token2f;
+            fountain_nz_    = token4f;
+            useGlobalCoord_ = true;
+
+            if (fountainopt_pt_ <= 0. || fountain_nz_ == 0)
                 throw std::invalid_argument("Incorrect fountain superstrip definition.");
             break;
 
@@ -245,14 +298,38 @@ void SuperstripArbiter::setDefinition(TString definition, unsigned tt, const Tri
         fountain_zBins_.resize(16);
 
         for (unsigned i=0; i<phiMins_.size(); ++i) {
-            fountain_phiBins_.at(i) = phiWidths_.at(i) * fountain_sf_;
-            fountain_zBins_  .at(i) = (zMaxs_.at(i) - zMins_.at(i)) / fountain_nz_;
+	  fountain_phiBins_.at(i) = phiWidths_.at(i) * fountain_xfactor_[i] * fountain_sf_; 
+	  fountain_zBins_  .at(i) = (zMaxs_.at(i) - zMins_.at(i)) / fountain_nz_;
 
-            unsigned nx = round_to_uint((phiMaxs_.at(i) - phiMins_.at(i)) / fountain_phiBins_.at(i));
-            if (fountain_max_nx_ < nx)
-                fountain_max_nx_ = nx;
+	  unsigned nx = round_to_uint((phiMaxs_.at(i) - phiMins_.at(i)) / fountain_phiBins_.at(i));
+	  if (fountain_max_nx_ < nx)
+	    fountain_max_nx_ = nx;
         }
         nsuperstripsPerLayer_ = fountain_max_nx_ * fountain_nz_;
+	print();
+        break;
+
+    case SuperstripType::FOUNTAINOPT:
+        fountain_phiBins_.clear();
+        fountain_zBins_.clear();
+
+        fountain_phiBins_.resize(16);
+        fountain_zBins_.resize(16);
+
+        for (unsigned i=0; i<phiMins_.size(); ++i) {
+	  if (fountainopt_pt_ == 1)
+	    fountain_phiBins_.at(i) = phiWidths_opt_lowpt_.at(i); 
+	  else
+	    fountain_phiBins_.at(i) = phiWidths_opt_highpt_.at(i); 
+	  
+	  fountain_zBins_  .at(i) = (zMaxs_.at(i) - zMins_.at(i)) / fountain_nz_;
+
+	  unsigned nx = round_to_uint((phiMaxs_.at(i) - phiMins_.at(i)) / fountain_phiBins_.at(i));
+	  if (fountain_max_nx_ < nx)
+	    fountain_max_nx_ = nx;
+        }
+        nsuperstripsPerLayer_ = fountain_max_nx_ * fountain_nz_;
+	print();
         break;
 
     default:
@@ -282,6 +359,10 @@ unsigned SuperstripArbiter::superstripGlobal(unsigned moduleId, float r, float p
         break;
 
     case SuperstripType::FOUNTAIN:
+        return superstripFountain(moduleId, r, phi, z, ds);
+        break;
+
+    case SuperstripType::FOUNTAINOPT:
         return superstripFountain(moduleId, r, phi, z, ds);
         break;
 
@@ -391,6 +472,15 @@ void SuperstripArbiter::print() {
 
     case SuperstripType::FOUNTAIN:
         std::cout << "Using fountain superstrip with sf: " << fountain_sf_ << ", nz: " << fountain_nz_
+                  << ", phi bins: " << fountain_phiBins_.at(0) << "," << fountain_phiBins_.at(1) << "," << fountain_phiBins_.at(2)
+                  << "," << fountain_phiBins_.at(3) << "," << fountain_phiBins_.at(4) << "," << fountain_phiBins_.at(5)
+                  << ", z bins: " << fountain_zBins_.at(0) << "," << fountain_zBins_.at(1) << "," << fountain_zBins_.at(2)
+                  << "," << fountain_zBins_.at(3) << "," << fountain_zBins_.at(4) << "," << fountain_zBins_.at(5)
+                  << ", nsuperstrips per layer: " << nsuperstripsPerLayer_ << std::endl;
+        break;
+
+    case SuperstripType::FOUNTAINOPT:
+        std::cout << "Using optimized pt range: " << fountainopt_pt_ << ", nz: " << fountain_nz_
                   << ", phi bins: " << fountain_phiBins_.at(0) << "," << fountain_phiBins_.at(1) << "," << fountain_phiBins_.at(2)
                   << "," << fountain_phiBins_.at(3) << "," << fountain_phiBins_.at(4) << "," << fountain_phiBins_.at(5)
                   << ", z bins: " << fountain_zBins_.at(0) << "," << fountain_zBins_.at(1) << "," << fountain_zBins_.at(2)

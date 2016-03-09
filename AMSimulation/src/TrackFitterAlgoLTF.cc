@@ -11,6 +11,7 @@ int TrackFitterAlgoLTF::fit(const TTRoadComb& acomb, TTTrack2& atrack) {
     }
 
     double normChi2 = linearizedTrackFitter_->fit(vars, acomb.hitBits);
+    std::cout<<" chi2="<<normChi2<<"\n";
     const std::vector<double>& pars = linearizedTrackFitter_->estimatedPars();
     //const std::vector<double>& principals = linearizedTrackFitter_->principalComponents();
     const std::vector<double>& principals = linearizedTrackFitter_->normalizedPrincipalComponents();

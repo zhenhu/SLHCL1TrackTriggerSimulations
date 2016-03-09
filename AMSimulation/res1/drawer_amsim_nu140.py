@@ -134,6 +134,7 @@ def drawer_project(tree, histos, options):
                 nroads_per_event += 1
                 ncombinations_per_event += ncombinations_per_road
 
+            
         assert(nroads_per_event <= evt.AMTTRoads_stubRefs.size())
         histos["nroads_per_event"].Fill(nroads_per_event)
 
