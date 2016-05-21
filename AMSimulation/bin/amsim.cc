@@ -111,6 +111,9 @@ int main(int argc, char **argv) {
         ("maxCombs"     , po::value<int>(&option.maxCombs)->default_value(999999999), "Specfiy max number of combinations per road")
         ("maxTracks"    , po::value<int>(&option.maxTracks)->default_value(999999999), "Specfiy max number of tracks per event")
 
+	// Only for Duplicate Flag
+        ("rmDuplicate", po::value<int>(&option.rmDuplicate)->default_value(-1), "Duplicate removal option. The argument is the number of max stubs allowed to be shared between AM tracks")
+	
         // Only for NTupleMaker
         ("no-trim"      , po::bool_switch(&option.no_trim)->default_value(false), "Do not trim ntuple branches")
         ;
