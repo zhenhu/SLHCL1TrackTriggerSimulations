@@ -3,6 +3,7 @@
 
 #include "SLHCL1TrackTriggerSimulations/AMSimulationIO/interface/TTTrackReader.h"
 #include <vector>
+#include <TVector2.h>
 
 namespace slhcl1tt{
   class ParameterDuplicateRemoval{
@@ -36,11 +37,12 @@ namespace slhcl1tt{
         BestTrack=TrackIterator_;
         return true;
       }
-      else if(fabs(Eta_-BestEta)<0.0601 && fabs(Phi_-BestPhi)<0.00576){
+      else if(fabs(Eta_-BestEta)<0.0601 && fabs(TVector2::Phi_mpi_pi(Phi_-BestPhi))<0.00576){
         if(Chi2_<BestChi2){    
           BestChi2=Chi2_;
           BestEta=Eta_;
           BestPhi=Phi_;
+	  BestRoadCategory=ContainsNoDummy;
 	  BestTrack=TrackIterator_;
         }
         TrackIterators.push_back(TrackIterator_);
