@@ -210,6 +210,13 @@ int TrackFitter::makeTracks(TString src, TString out) {
 	DuplicateRemoval flagDuplicates;
 	flagDuplicates.CheckTracks(tracks, po_.rmDuplicate);
 
+	//----------------------------------------------------------------------
+	// Identify and flag duplicates by defining a track-parameter space 
+	// inside of which anything is considered to be a single track
+	//----------------------------------------------------------------------
+	ParameterDuplicateRemoval RemoveParameterDuplicates;
+	if(po_.rmParDuplicate) RemoveParameterDuplicates.ReduceTracks(tracks);
+
 
 
 
