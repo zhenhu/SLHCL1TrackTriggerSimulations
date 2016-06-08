@@ -5,6 +5,7 @@
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/Helper.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/ProgramOption.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/TriggerTowerMap.h"
+#include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/LocalToGlobalMap.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/SuperstripArbiter.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/Attributes.h"
 using namespace slhcl1tt;
@@ -21,6 +22,9 @@ class PatternGenerator {
         ttmap_ = new TriggerTowerMap();
         ttmap_->read(po_.datadir);
 
+        l2gmap_ = new LocalToGlobalMap();
+        l2gmap_->read(po_.datadir);
+
         arbiter_ = new SuperstripArbiter();
         arbiter_->setDefinition(po_.superstrip, po_.tower, ttmap_);
     }
@@ -28,6 +32,7 @@ class PatternGenerator {
     // Destructor
     ~PatternGenerator() {
         if (ttmap_)     delete ttmap_;
+        if (l2gmap_)    delete l2gmap_;
         if (arbiter_)   delete arbiter_;
 
         for (std::map<pattern_type, Attributes *>::iterator it=patternAttributes_map_.begin();
@@ -60,6 +65,7 @@ class PatternGenerator {
 
     // Operators
     TriggerTowerMap   * ttmap_;
+    LocalToGlobalMap  * l2gmap_;
     SuperstripArbiter * arbiter_;
 
     // Pattern bank data
