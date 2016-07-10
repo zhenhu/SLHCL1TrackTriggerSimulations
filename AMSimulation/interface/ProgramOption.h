@@ -57,6 +57,9 @@ struct ProgramOption {
     int 	rmDuplicate;
     bool        rmParDuplicate;
 
+    bool        oldCB;
+    bool	FiveOfSix;
+
     bool        no_trim;
     bool        removeOverlap;
 
