@@ -11,16 +11,11 @@ int TrackFitterAlgoLTF::fit(const TTRoadComb& acomb, TTTrack2& atrack) {
     }
 
     double normChi2 = linearizedTrackFitter_->fit(vars, acomb.hitBits);
-    std::cout<<" chi2="<<normChi2<<"\n";
     const std::vector<double>& pars = linearizedTrackFitter_->estimatedPars();
     //const std::vector<double>& principals = linearizedTrackFitter_->principalComponents();
     const std::vector<double>& principals = linearizedTrackFitter_->normalizedPrincipalComponents();
 
-    // TODO: This should be returned by the LinearizedTrackFitter
-    int ndof = 8;
-    if (1 <= acomb.hitBits && acomb.hitBits <= 6) {
-      ndof -= 2;
-    }
+    int ndof = linearizedTrackFitter_->ndof();
 
     atrack.setTrackParams(0.003 * 3.8 * pars[0], pars[1], pars[2], pars[3], 0, normChi2*ndof, ndof, 0, 0);
 

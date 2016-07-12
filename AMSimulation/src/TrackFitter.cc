@@ -103,7 +103,12 @@ int TrackFitter::makeTracks(TString src, TString out) {
                     stubRefs.at(ilayer).resize(po_.maxStubs);
             }
 
-            const std::vector<std::vector<unsigned> >& combinations = combinationFactory_.combine(stubRefs);
+	    // const std::vector<std::vector<unsigned> > & combinations = combinationFactory_.combine(stubRefs);
+
+	    std::vector<std::vector<unsigned> > combinations;
+	    // The compiler will likely do RVO so the move might not be needed, we prefer to be explicit about it.
+	    if (po_.oldCB) combinations = std::move(combinationFactory_.combine(stubRefs));
+	    else combinations = std::move(combinationBuilderFactory_->combine(stubRefs));
 
             for (unsigned icomb=0; icomb<combinations.size(); ++icomb)
                 assert(combinations.at(icomb).size() == reader.vr_stubRefs->at(iroad).size());

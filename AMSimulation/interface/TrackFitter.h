@@ -8,6 +8,7 @@
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/TrackFitterAlgoATF.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/TrackFitterAlgoLTF.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/CombinationFactory.h"
+#include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/CombinationBuilderFactory.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/GhostBuster.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/DuplicateRemoval.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulation/interface/ParameterDuplicateRemoval.h"
@@ -22,7 +23,8 @@ class TrackFitter {
     TrackFitter(const ProgramOption& po)
     : po_(po),
       nEvents_(po.maxEvents), verbose_(po.verbose),
-      prefixRoad_("AMTTRoads_"), prefixTrack_("AMTTTracks_"), suffix_("") {
+    prefixRoad_("AMTTRoads_"), prefixTrack_("AMTTTracks_"), suffix_(""),
+    combinationBuilderFactory_(std::make_shared<CombinationBuilderFactory>(po_.FiveOfSix)) {
 
         l2gmap_ = new LocalToGlobalMap();
         l2gmap_->read(po_.datadir);
@@ -74,6 +76,9 @@ class TrackFitter {
 
     // Combination factory
     CombinationFactory combinationFactory_;
+
+    // SCB and ACB combination factory
+    std::shared_ptr<CombinationBuilderFactory> combinationBuilderFactory_;
 
     // Ghost buster
     GhostBuster ghostBuster_;

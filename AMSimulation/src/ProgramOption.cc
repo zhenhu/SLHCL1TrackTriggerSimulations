@@ -61,6 +61,9 @@ std::ostream& operator<<(std::ostream& o, const ProgramOption& po) {
       << "  maxCombs: "     << po.maxCombs
       << "  maxTracks: "    << po.maxTracks
 
+      << "  oldCB: "        << po.oldCB
+      << "  FiveOfSix: "    << po.FiveOfSix
+
       << "  no_trim: "      << po.no_trim
       << "  removeOverlap: "<< po.removeOverlap
 
