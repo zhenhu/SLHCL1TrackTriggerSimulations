@@ -33,19 +33,6 @@ unsigned getHitBits(const std::vector<bool>& stubs_bool) {
 bool sortByPt(const TTTrack2& lhs, const TTTrack2& rhs) {
     return lhs.pt() > rhs.pt();
 }
-
-template<int N, int S>  // N=number of bits, S=signed or unsigned
-struct MyBitSet {
-    int64_t operator()(const std::string& bitString, size_t pos=0, size_t n=N) {
-        std::bitset<N> bits(bitString, pos, n);
-        int64_t ret = static_cast<int64_t>(bits.to_ulong());
-        if (S>0 && bits.test(N-1)) {  // is signed and is negative
-            static const uint64_t ffffffff = -1;
-            ret |= (ffffffff << N);
-        }
-        return ret;
-    }
-};
 }
 
 
@@ -162,9 +149,9 @@ int TrackFitter::makeTracks(TString src, TString out) {
                             acomb.stubs_bool.push_back(true);
                             acomb.stubs_bitString.push_back("");
                         } else {
-                            acomb.stubs_r   .push_back(reader.vb_r   ->at(stubRef));  // full floating-point precision, not fixed-point precion
-                            acomb.stubs_phi .push_back(reader.vb_phi ->at(stubRef));  // full floating-point precision, not fixed-point precion
-                            acomb.stubs_z   .push_back(reader.vb_z   ->at(stubRef));  // full floating-point precision, not fixed-point precion
+                            acomb.stubs_r   .push_back(reader.vb_r   ->at(stubRef));  // full floating-point precision, not fixed-point precision
+                            acomb.stubs_phi .push_back(reader.vb_phi ->at(stubRef));  // full floating-point precision, not fixed-point precision
+                            acomb.stubs_z   .push_back(reader.vb_z   ->at(stubRef));  // full floating-point precision, not fixed-point precision
                             acomb.stubs_bool.push_back(true);
                             acomb.stubs_bitString.push_back(reader.vb_bitString->at(stubRef));
 
@@ -178,24 +165,23 @@ int TrackFitter::makeTracks(TString src, TString out) {
                                 l2gmap_ -> convert(moduleId, strip, segment, conv_r, conv_phi, conv_z, conv_l2g);
                                 l2gmap_ -> convertInt(moduleId, strip, segment, po_.tower, conv_l2g, conv_r_int, conv_phi_int, conv_z_int, conv_l2g_int);
 
+//                                std::cout << "phi = " << acomb.stubs_phi.back() << std::endl;
+//                                std::cout << "r = " << acomb.stubs_r.back() << std::endl;
+//                                std::cout << "z = " << acomb.stubs_z.back() << std::endl;
+//                                std::cout << "strip = " << strip << ", " << acomb.strip_int(acomb.stubs_bitString.size()-1) << std::endl;
+
                                 int bend_4b = int(std::round(stub_ds)) >> 1;
                                 int strip_7b = (halfStripRound(strip)) >> 4;
 
                                 // Sanity checks
-                                const std::string& bitString = acomb.stubs_bitString.back();
-                                int64_t conv_phi_int_2 = MyBitSet<18,1>()(bitString, 1);  // 18 bits starting from position 1
-                                int64_t conv_r_int_2   = MyBitSet<18,1>()(bitString, 1+18);
-                                int64_t conv_z_int_2   = MyBitSet<18,1>()(bitString, 1+18+18);
-                                int64_t bend_4b_2      = MyBitSet<4,1> ()(bitString, 1+18+18+18);
-                                int64_t strip_7b_2     = MyBitSet<7,0> ()(bitString, 1+18+18+18+4);
-
-                                assert(conv_phi_int_2 == conv_phi_int);
-                                assert(conv_r_int_2   == conv_r_int);
-                                assert(conv_z_int_2   == conv_z_int);
-                                assert(bend_4b_2      == bend_4b);
-                                assert(strip_7b_2     == strip_7b);
-                                assert(bitString.size() == 66);
-
+                                if (!acomb.stubs_bitString.empty()) {
+                                    size_t index = acomb.stubs_bitString.size() - 1;
+                                    assert(acomb.stubs_phi_int(index) == conv_phi_int);
+                                    assert(acomb.stubs_r_int(index) == conv_r_int);
+                                    assert(acomb.stubs_z_int(index) == conv_z_int);
+                                    assert(acomb.bend_int(index) == bend_4b);
+                                    assert(acomb.strip_int(index) == strip_7b);
+                                }
                                 const unsigned superstripId = reader.vr_superstripIds->at(iroad).at(istub);
                                 const unsigned superstripId2 = reader.vb_superstripId->at(stubRef);
                                 assert(superstripId2 == superstripId);

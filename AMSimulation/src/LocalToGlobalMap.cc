@@ -109,8 +109,8 @@ void LocalToGlobalMap::convertInt(const unsigned moduleId, const float strip, co
     //isegment = isegment & 0xf;
 
     float deltaPhi = 1. * 2;     // [-1, 1] rad
-    float deltaZ   = 1024. * 2;  // [-1024, 1024] cm
-    float deltaR   = 1024. * 2;  // [-1024, 1024] cm
+    float deltaZ   = 512. * 2;  // [-512, 512] cm
+    float deltaR   = 512. * 2;  // [-512, 512] cm
 
     unsigned ttphi = tt%8;
     float phi0 = -M_PI/2. + (2.*M_PI/8.) * (0.5+ttphi);  // center of trigger tower

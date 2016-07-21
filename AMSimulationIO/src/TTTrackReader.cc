@@ -51,7 +51,11 @@ TTTrackWriter::TTTrackWriter(int verbose)
   vt_combRef      (new std::vector<unsigned>()),
   vt_patternRef   (new std::vector<unsigned>()),
   vt_stubRefs     (new std::vector<std::vector<unsigned> >()),
-  vt_principals   (new std::vector<std::vector<float> >()) {}
+  vt_principals   (new std::vector<std::vector<float> >()),
+  vt_parsInt      (new std::vector<std::vector<Long64_t> >()),
+  vt_chi2TermsInt (new std::vector<std::vector<Long64_t> >()) {}
+//  vt_parsInt      (new std::vector<std::vector<int64_t> >()),
+//  vt_chi2TermsInt (new std::vector<std::vector<int64_t> >()) {}
 
 
 TTTrackWriter::~TTTrackWriter() {}
@@ -90,6 +94,8 @@ int TTTrackWriter::init(TChain* tchain, TString out, TString prefix, TString suf
     ttree->Branch(prefix + "patternRef"     + suffix, &(*vt_patternRef));
     ttree->Branch(prefix + "stubRefs"       + suffix, &(*vt_stubRefs));
     ttree->Branch(prefix + "principals"     + suffix, &(*vt_principals));
+    ttree->Branch(prefix + "parsInt"        + suffix, &(*vt_parsInt));
+    ttree->Branch(prefix + "chi2TermsInt"   + suffix, &(*vt_chi2TermsInt));
     return 0;
 }
 
@@ -183,6 +189,8 @@ void TTTrackWriter::fill(const std::vector<TTTrack2>& tracks) {
     vt_patternRef      ->clear();
     vt_stubRefs        ->clear();
     vt_principals      ->clear();
+    vt_parsInt         ->clear();
+    vt_chi2TermsInt    ->clear();
 
     const unsigned ntracks = tracks.size();
     for (unsigned i=0; i<ntracks; ++i) {
@@ -218,6 +226,14 @@ void TTTrackWriter::fill(const std::vector<TTTrack2>& tracks) {
         vt_patternRef      ->push_back(track.patternRef());
         vt_stubRefs        ->push_back(track.stubRefs());
         vt_principals      ->push_back(track.principals());
+//        vt_parsInt         ->push_back(track.parsInt());
+//        vt_chi2TermsInt    ->push_back(track.chi2TermsInt());
+        std::vector<Long64_t> pl;
+        for(auto p : track.parsInt()) pl.push_back(p);
+        vt_parsInt         ->push_back(pl);
+        std::vector<Long64_t> cl;
+        for(auto c : track.chi2TermsInt()) cl.push_back(c);
+        vt_chi2TermsInt    ->push_back(cl);
     }
 
     ttree->Fill();
