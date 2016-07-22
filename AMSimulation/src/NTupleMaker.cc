@@ -191,7 +191,6 @@ void NTupleMaker::makeLeafMap() {
     leafmap["double"] = DOUBLE_T;
     leafmap["Long64_t"] = LONG64_T;
     leafmap["ULong64_t"] = ULONG64_T;
-//    leafmap["int64_t"] = INT64_T;
 
     leafmap["vector<char>"] = CHAR_V;
     leafmap["vector<unsigned char>"] = UCHAR_V;
@@ -204,7 +203,6 @@ void NTupleMaker::makeLeafMap() {
     leafmap["vector<Long64_t>"] = LONG64_V;
     leafmap["vector<ULong64_t>"] = ULONG64_V;
     leafmap["vector<bool>"] = BOOL_V;
-//    leafmap["vector<int64_t>"] = INT64_V;
 
     leafmap["vector<vector<char> >"] = CHAR_VV;
     leafmap["vector<vector<unsigned char> >"] = UCHAR_VV;
@@ -217,7 +215,6 @@ void NTupleMaker::makeLeafMap() {
     leafmap["vector<vector<Long64_t> >"] = LONG64_VV;
     leafmap["vector<vector<ULong64_t> >"] = ULONG64_VV;
     leafmap["vector<vector<bool> >"] = BOOL_VV;
-//    leafmap["vector<vector<int64_t> >"] = INT64_VV;
 
     leafmap["vector<vector<vector<char> > >"] = CHAR_VVV;
     leafmap["vector<vector<vector<unsigned char> > >"] = UCHAR_VVV;
@@ -230,7 +227,6 @@ void NTupleMaker::makeLeafMap() {
     leafmap["vector<vector<vector<Long64_t> > >"] = LONG64_VVV;
     leafmap["vector<vector<vector<ULong64_t> > >"] = ULONG64_VVV;
     leafmap["vector<vector<vector<bool> > >"] = BOOL_VVV;
-//    leafmap["vector<vector<vector<int64_t> > >"] = INT64_VVV;
 }
 
 void NTupleMaker::makeConnector(const TBranch* branch, TTree* tree) {
@@ -251,7 +247,6 @@ void NTupleMaker::makeConnector(const TBranch* branch, TTree* tree) {
         case LONG64_T   : connectors.push_back(new TypedBranchConnector<Long64_t>  (branchName, "L", tree) ); break;
         case ULONG64_T  : connectors.push_back(new TypedBranchConnector<ULong64_t> (branchName, "l", tree) ); break;
         case BOOL_T     : connectors.push_back(new TypedBranchConnector<Bool_t>    (branchName, "O", tree) ); break;
-        // case INT64_T   : connectors.push_back(new TypedBranchConnector<int64_t>   (branchName, "", tree) ); break;
 
         case CHAR_V     : connectors.push_back(new TypedBranchConnector<std::vector<Char_t> >    (branchName, "", tree) ); break;
         case UCHAR_V    : connectors.push_back(new TypedBranchConnector<std::vector<UChar_t> >   (branchName, "", tree) ); break;
@@ -264,7 +259,6 @@ void NTupleMaker::makeConnector(const TBranch* branch, TTree* tree) {
         case LONG64_V   : connectors.push_back(new TypedBranchConnector<std::vector<Long64_t> >  (branchName, "", tree) ); break;
         case ULONG64_V  : connectors.push_back(new TypedBranchConnector<std::vector<ULong64_t> > (branchName, "", tree) ); break;
         case BOOL_V     : connectors.push_back(new TypedBranchConnector<std::vector<Bool_t> >    (branchName, "", tree) ); break;
-//        case INT64_V    : connectors.push_back(new TypedBranchConnector<std::vector<int64_t> >   (branchName, "", tree) ); break;
 
         case CHAR_VV    : connectors.push_back(new TypedBranchConnector<std::vector<std::vector<Char_t> > >    (branchName, "", tree) ); break;
         case UCHAR_VV   : connectors.push_back(new TypedBranchConnector<std::vector<std::vector<UChar_t> > >   (branchName, "", tree) ); break;
@@ -277,7 +271,6 @@ void NTupleMaker::makeConnector(const TBranch* branch, TTree* tree) {
         case LONG64_VV  : connectors.push_back(new TypedBranchConnector<std::vector<std::vector<Long64_t> > >  (branchName, "", tree) ); break;
         case ULONG64_VV : connectors.push_back(new TypedBranchConnector<std::vector<std::vector<ULong64_t> > > (branchName, "", tree) ); break;
         case BOOL_VV    : connectors.push_back(new TypedBranchConnector<std::vector<std::vector<Bool_t> > >    (branchName, "", tree) ); break;
-//        case INT64_VV   : connectors.push_back(new TypedBranchConnector<std::vector<std::vector<int64_t> > >   (branchName, "", tree) ); break;
 
         case CHAR_VVV   : connectors.push_back(new TypedBranchConnector<std::vector<std::vector<std::vector<Char_t> > > >    (branchName, "", tree) ); break;
         case UCHAR_VVV  : connectors.push_back(new TypedBranchConnector<std::vector<std::vector<std::vector<UChar_t> > > >   (branchName, "", tree) ); break;
@@ -290,7 +283,6 @@ void NTupleMaker::makeConnector(const TBranch* branch, TTree* tree) {
         case LONG64_VVV : connectors.push_back(new TypedBranchConnector<std::vector<std::vector<std::vector<Long64_t> > > >  (branchName, "", tree) ); break;
         case ULONG64_VVV: connectors.push_back(new TypedBranchConnector<std::vector<std::vector<std::vector<ULong64_t> > > > (branchName, "", tree) ); break;
         case BOOL_VVV   : connectors.push_back(new TypedBranchConnector<std::vector<std::vector<std::vector<Bool_t> > > >    (branchName, "", tree) ); break;
-//        case INT64_VVV  : connectors.push_back(new TypedBranchConnector<std::vector<std::vector<std::vector<int64_t> > > >   (branchName, "", tree) ); break;
 
         default         : std::cout << Error() << "Cannot handle leaf of ClassName: " << branchClassName << std::endl; break;
     }

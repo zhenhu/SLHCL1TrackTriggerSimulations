@@ -27,14 +27,14 @@ int TrackFitterAlgoLTF::fit(const TTRoadComb& acomb, TTTrack2& atrack)
             stripIndexes.push_back(int(acomb.strip_int(istub)));
         }
         normChi2_ = linearizedTrackFitterEmulator_->fit(varsInt, stripIndexes, acomb.hitBits);
-//        // Arrange the stub coordinates in the format expected by the fitter
-//        std::vector<double> vars;
-//        for (unsigned istub = 0; istub < acomb.stubs_phi.size(); ++istub) {
-//            vars.push_back(acomb.stubs_phi.at(istub));
-//            vars.push_back(acomb.stubs_r.at(istub));
-//            vars.push_back(acomb.stubs_z.at(istub));
-//        }
-//        normChi2_ = linearizedTrackFitterEmulator_->fit(vars, stripIndexes, acomb.hitBits);
+        // // Use this to run the emulator on floating point input with internal encoding
+        // std::vector<double> vars;
+        // for (unsigned istub = 0; istub < acomb.stubs_phi.size(); ++istub) {
+        //     vars.push_back(acomb.stubs_phi.at(istub));
+        //     vars.push_back(acomb.stubs_r.at(istub));
+        //     vars.push_back(acomb.stubs_z.at(istub));
+        // }
+        // normChi2_ = linearizedTrackFitterEmulator_->fit(vars, stripIndexes, acomb.hitBits);
         fillTrack(linearizedTrackFitterEmulator_, atrack);
         atrack.setParsInt(linearizedTrackFitterEmulator_->estimatedParsInt());
         atrack.setChi2TermsInt(linearizedTrackFitterEmulator_->chi2TermsInt());
