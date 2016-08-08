@@ -103,7 +103,9 @@ int TrackFitter::makeTracks(TString src, TString out) {
                     stubRefs.at(ilayer).resize(po_.maxStubs);
             }
 
-	    // const std::vector<std::vector<unsigned> > & combinations = combinationFactory_.combine(stubRefs);
+            if (po_.emu != 0) writeFirmwareInput(stubRefs, reader);
+
+            // const std::vector<std::vector<unsigned> > & combinations = combinationFactory_.combine(stubRefs);
 
 	    std::vector<std::vector<unsigned> > combinations;
 	    // The compiler will likely do RVO so the move might not be needed, we prefer to be explicit about it.
@@ -187,7 +189,7 @@ int TrackFitter::makeTracks(TString src, TString out) {
                         acomb.stubs_phi .push_back(0.);
                         acomb.stubs_z   .push_back(0.);
                         acomb.stubs_bool.push_back(false);
-                        acomb.stubs_bitString.push_back("");
+                        acomb.stubs_bitString.push_back(std::string(66, '0'));
                     }
                 }
 
@@ -202,6 +204,8 @@ int TrackFitter::makeTracks(TString src, TString out) {
                 // Fit
                 TTTrack2 atrack;
                 fitstatus = fitter_->fit(acomb, atrack);
+
+                if (po_.emu != 0) writeFirmwareOutput(atrack);
 
                 atrack.setTower     (po_.tower);
                 atrack.setRoadRef   (acomb.roadRef);
@@ -346,4 +350,62 @@ int TrackFitter::run() {
     Timing();
 
     return exitcode;
+}
+
+
+void TrackFitter::writeFirmwareInput(const std::vector<std::vector<unsigned> > & stubRefs, TTRoadReader & reader)
+{
+    unsigned ilayer = 0;
+    for (auto layer : stubRefs) {
+        // std::cout << "layer " << ilayer << ": ";
+        unsigned numStubs = 0;
+        for (auto stubRef = layer.rbegin(); stubRef != layer.rend(); ++stubRef) {
+            // std::cout << reader.vb_bitString->at(*stubRef) << " ";
+            firmwareInputFile_ << reader.vb_bitString->at(*stubRef);
+            ++numStubs;
+        }
+        // Fill up missing stubs with zeros
+        for (unsigned missingStubs = numStubs; missingStubs < 4; ++missingStubs) {
+            // std::cout << emptyFirmwareInputString_ << " ";
+            firmwareInputFile_ << emptyFirmwareInputString_;
+        }
+        ++ilayer;
+        // std::cout << std::endl;
+    }
+    firmwareInputFile_ << std::endl;
+}
+
+
+void TrackFitter::writeFirmwareOutput(const TTTrack2 & atrack)
+{
+    std::vector<int64_t> parsInt(atrack.parsInt());
+    std::vector<int64_t> chi2TermsInt(atrack.chi2TermsInt());
+    if (parsInt.size() == 4) {
+        // std::cout << parsInt.at(0) << " ";
+        // std::cout << parsInt.at(1) << " ";
+        // std::cout << chi2TermsInt.at(0) << " ";
+        // std::cout << chi2TermsInt.at(1) << " ";
+        // std::cout << chi2TermsInt.at(2) << " ";
+        // std::cout << chi2TermsInt.at(3) << " ";
+        // std::cout << parsInt.at(2) << " ";
+        // std::cout << parsInt.at(3) << " ";
+        // std::cout << chi2TermsInt.at(4) << " ";
+        // std::cout << chi2TermsInt.at(5) << " ";
+        // std::cout << chi2TermsInt.at(6) << " ";
+        // std::cout << chi2TermsInt.at(7) << " ";
+        // std::cout << std::endl;
+        firmwareOutputFile_ << parsInt.at(0) << " ";
+        firmwareOutputFile_ << parsInt.at(1) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(0) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(1) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(2) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(3) << " ";
+        firmwareOutputFile_ << parsInt.at(2) << " ";
+        firmwareOutputFile_ << parsInt.at(3) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(4) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(5) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(6) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(7) << " ";
+        firmwareOutputFile_ << std::endl;
+    }
 }

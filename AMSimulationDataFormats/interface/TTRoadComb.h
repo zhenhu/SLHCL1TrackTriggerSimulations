@@ -5,6 +5,8 @@
 #include <iosfwd>
 #include <bitset>
 
+#include <iostream>
+
 
 namespace slhcl1tt {
 
