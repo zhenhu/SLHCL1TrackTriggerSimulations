@@ -189,7 +189,7 @@ int TrackFitter::makeTracks(TString src, TString out) {
                         acomb.stubs_phi .push_back(0.);
                         acomb.stubs_z   .push_back(0.);
                         acomb.stubs_bool.push_back(false);
-                        acomb.stubs_bitString.push_back(std::string(66, '0'));
+                        acomb.stubs_bitString.push_back(emptyFirmwareInputString_);
                     }
                 }
 
