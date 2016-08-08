@@ -63,6 +63,7 @@ class TrackFitter {
         if (l2gmap_)  delete l2gmap_;
         if (fitter_)  delete fitter_;
         firmwareInputFile_.close();
+        firmwareOutputFile_.close();
     }
 
     // Main driver
