@@ -26,7 +26,7 @@
 #pragma link C++ class std::vector<std::vector<unsigned> >+;
 #pragma link C++ class std::vector<std::vector<int> >+;
 #pragma link C++ class std::vector<std::vector<float> >+;
-//#pragma link C++ class std::vector<std::vector<Long64_t> >+;
+#pragma link C++ class std::vector<std::vector<Long64_t> >+;
 //#pragma link C++ class std::vector<std::vector<ULong64_t> >+;
 
 #pragma link C++ class std::vector<std::vector<std::vector<unsigned> > >+;

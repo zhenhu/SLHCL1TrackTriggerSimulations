@@ -66,6 +66,8 @@ class TTTrackWriter : public BasicWriter {
     std::auto_ptr<std::vector<unsigned> >               vt_patternRef;
     std::auto_ptr<std::vector<std::vector<unsigned> > > vt_stubRefs;
     std::auto_ptr<std::vector<std::vector<float> > >    vt_principals;
+    std::auto_ptr<std::vector<std::vector<Long64_t> > > vt_parsInt;
+    std::auto_ptr<std::vector<std::vector<Long64_t> > > vt_chi2TermsInt;
 };
 
 }  // namespace slhcl1tt

@@ -33,19 +33,6 @@ unsigned getHitBits(const std::vector<bool>& stubs_bool) {
 bool sortByPt(const TTTrack2& lhs, const TTTrack2& rhs) {
     return lhs.pt() > rhs.pt();
 }
-
-template<int N, int S>  // N=number of bits, S=signed or unsigned
-struct MyBitSet {
-    int64_t operator()(const std::string& bitString, size_t pos=0, size_t n=N) {
-        std::bitset<N> bits(bitString, pos, n);
-        int64_t ret = static_cast<int64_t>(bits.to_ulong());
-        if (S>0 && bits.test(N-1)) {  // is signed and is negative
-            static const uint64_t ffffffff = -1;
-            ret |= (ffffffff << N);
-        }
-        return ret;
-    }
-};
 }
 
 
@@ -116,7 +103,9 @@ int TrackFitter::makeTracks(TString src, TString out) {
             //        stubRefs.at(ilayer).resize(po_.maxStubs);
             //}
 
-	    // const std::vector<std::vector<unsigned> > & combinations = combinationFactory_.combine(stubRefs);
+            if (po_.emu != 0) writeFirmwareInput(stubRefs, reader);
+
+            // const std::vector<std::vector<unsigned> > & combinations = combinationFactory_.combine(stubRefs);
 
 	    std::vector<std::vector<unsigned> > combinations;
 	    // The compiler will likely do RVO so the move might not be needed, we prefer to be explicit about it.
@@ -162,9 +151,9 @@ int TrackFitter::makeTracks(TString src, TString out) {
                             acomb.stubs_bool.push_back(true);
                             acomb.stubs_bitString.push_back("");
                         } else {
-                            acomb.stubs_r   .push_back(reader.vb_r   ->at(stubRef));  // full floating-point precision, not fixed-point precion
-                            acomb.stubs_phi .push_back(reader.vb_phi ->at(stubRef));  // full floating-point precision, not fixed-point precion
-                            acomb.stubs_z   .push_back(reader.vb_z   ->at(stubRef));  // full floating-point precision, not fixed-point precion
+                            acomb.stubs_r   .push_back(reader.vb_r   ->at(stubRef));  // full floating-point precision, not fixed-point precision
+                            acomb.stubs_phi .push_back(reader.vb_phi ->at(stubRef));  // full floating-point precision, not fixed-point precision
+                            acomb.stubs_z   .push_back(reader.vb_z   ->at(stubRef));  // full floating-point precision, not fixed-point precision
                             acomb.stubs_bool.push_back(true);
                             acomb.stubs_bitString.push_back(reader.vb_bitString->at(stubRef));
 
@@ -182,20 +171,14 @@ int TrackFitter::makeTracks(TString src, TString out) {
                                 int strip_7b = (halfStripRound(strip)) >> 4;
 
                                 // Sanity checks
-                                const std::string& bitString = acomb.stubs_bitString.back();
-                                int64_t conv_phi_int_2 = MyBitSet<18,1>()(bitString, 1);  // 18 bits starting from position 1
-                                int64_t conv_r_int_2   = MyBitSet<18,1>()(bitString, 1+18);
-                                int64_t conv_z_int_2   = MyBitSet<18,1>()(bitString, 1+18+18);
-                                int64_t bend_4b_2      = MyBitSet<4,1> ()(bitString, 1+18+18+18);
-                                int64_t strip_7b_2     = MyBitSet<7,0> ()(bitString, 1+18+18+18+4);
-
-                                assert(conv_phi_int_2 == conv_phi_int);
-                                assert(conv_r_int_2   == conv_r_int);
-                                assert(conv_z_int_2   == conv_z_int);
-                                assert(bend_4b_2      == bend_4b);
-                                assert(strip_7b_2     == strip_7b);
-                                assert(bitString.size() == 66);
-
+                                if (!acomb.stubs_bitString.empty()) {
+                                    size_t index = acomb.stubs_bitString.size() - 1;
+                                    assert(acomb.stubs_phi_int(index) == conv_phi_int);
+                                    assert(acomb.stubs_r_int(index) == conv_r_int);
+                                    assert(acomb.stubs_z_int(index) == conv_z_int);
+                                    assert(acomb.bend_int(index) == bend_4b);
+                                    assert(acomb.strip_int(index) == strip_7b);
+                                }
                                 const unsigned superstripId = reader.vr_superstripIds->at(iroad).at(istub);
                                 const unsigned superstripId2 = reader.vb_superstripId->at(stubRef);
                                 assert(superstripId2 == superstripId);
@@ -206,7 +189,7 @@ int TrackFitter::makeTracks(TString src, TString out) {
                         acomb.stubs_phi .push_back(0.);
                         acomb.stubs_z   .push_back(0.);
                         acomb.stubs_bool.push_back(false);
-                        acomb.stubs_bitString.push_back("");
+                        acomb.stubs_bitString.push_back(emptyFirmwareInputString_);
                     }
                 }
 
@@ -221,6 +204,8 @@ int TrackFitter::makeTracks(TString src, TString out) {
                 // Fit
                 TTTrack2 atrack;
                 fitstatus = fitter_->fit(acomb, atrack);
+
+                if (po_.emu != 0) writeFirmwareOutput(atrack);
 
                 atrack.setTower     (po_.tower);
                 atrack.setRoadRef   (acomb.roadRef);
@@ -365,4 +350,62 @@ int TrackFitter::run() {
     Timing();
 
     return exitcode;
+}
+
+
+void TrackFitter::writeFirmwareInput(const std::vector<std::vector<unsigned> > & stubRefs, TTRoadReader & reader)
+{
+    unsigned ilayer = 0;
+    for (auto layer : stubRefs) {
+        // std::cout << "layer " << ilayer << ": ";
+        unsigned numStubs = 0;
+        for (auto stubRef = layer.rbegin(); stubRef != layer.rend(); ++stubRef) {
+            // std::cout << reader.vb_bitString->at(*stubRef) << " ";
+            firmwareInputFile_ << reader.vb_bitString->at(*stubRef);
+            ++numStubs;
+        }
+        // Fill up missing stubs with zeros
+        for (unsigned missingStubs = numStubs; missingStubs < 4; ++missingStubs) {
+            // std::cout << emptyFirmwareInputString_ << " ";
+            firmwareInputFile_ << emptyFirmwareInputString_;
+        }
+        ++ilayer;
+        // std::cout << std::endl;
+    }
+    firmwareInputFile_ << std::endl;
+}
+
+
+void TrackFitter::writeFirmwareOutput(const TTTrack2 & atrack)
+{
+    std::vector<int64_t> parsInt(atrack.parsInt());
+    std::vector<int64_t> chi2TermsInt(atrack.chi2TermsInt());
+    if (parsInt.size() == 4) {
+        // std::cout << parsInt.at(0) << " ";
+        // std::cout << parsInt.at(1) << " ";
+        // std::cout << chi2TermsInt.at(0) << " ";
+        // std::cout << chi2TermsInt.at(1) << " ";
+        // std::cout << chi2TermsInt.at(2) << " ";
+        // std::cout << chi2TermsInt.at(3) << " ";
+        // std::cout << parsInt.at(2) << " ";
+        // std::cout << parsInt.at(3) << " ";
+        // std::cout << chi2TermsInt.at(4) << " ";
+        // std::cout << chi2TermsInt.at(5) << " ";
+        // std::cout << chi2TermsInt.at(6) << " ";
+        // std::cout << chi2TermsInt.at(7) << " ";
+        // std::cout << std::endl;
+        firmwareOutputFile_ << parsInt.at(0) << " ";
+        firmwareOutputFile_ << parsInt.at(1) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(0) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(1) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(2) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(3) << " ";
+        firmwareOutputFile_ << parsInt.at(2) << " ";
+        firmwareOutputFile_ << parsInt.at(3) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(4) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(5) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(6) << " ";
+        firmwareOutputFile_ << chi2TermsInt.at(7) << " ";
+        firmwareOutputFile_ << std::endl;
+    }
 }

@@ -24,7 +24,8 @@ class TrackFitter {
     : po_(po),
       nEvents_(po.maxEvents), verbose_(po.verbose),
     prefixRoad_("AMTTRoads_"), prefixTrack_("AMTTTracks_"), suffix_(""),
-    combinationBuilderFactory_(std::make_shared<CombinationBuilderFactory>(po_.FiveOfSix)) {
+    combinationBuilderFactory_(std::make_shared<CombinationBuilderFactory>(po_.FiveOfSix)),
+      emptyFirmwareInputString_(66, '0') {
 
         l2gmap_ = new LocalToGlobalMap();
         l2gmap_->read(po_.datadir);
@@ -42,17 +43,34 @@ class TrackFitter {
         } else {
             throw std::invalid_argument("unknown track fitter algo.");
         }
+
+        if (po_.emu != 0) {
+            firmwareInputFile_.open("FirmwareInputRoads.txt");
+            if (!firmwareInputFile_) {
+                std::cout << "error opening FirmwareInputRoads.txt" << std::endl;
+                return;
+            }
+            firmwareOutputFile_.open("FirmwareOutput.txt");
+            if (!firmwareOutputFile_) {
+                std::cout << "error opening FirmwareOutput.txt" << std::endl;
+                return;
+            }
+        }
     }
 
     // Destructor
     ~TrackFitter() {
         if (l2gmap_)  delete l2gmap_;
         if (fitter_)  delete fitter_;
+        firmwareInputFile_.close();
+        firmwareOutputFile_.close();
     }
 
     // Main driver
     int run();
 
+    void writeFirmwareInput(const std::vector<std::vector<unsigned> > & stubRefs, TTRoadReader & reader);
+    void writeFirmwareOutput(const TTTrack2 & atrack);
 
   private:
     // Member functions
@@ -85,6 +103,10 @@ class TrackFitter {
 
     // MC truth associator
     MCTruthAssociator truthAssociator_;
+
+    std::ofstream firmwareInputFile_;
+    std::ofstream firmwareOutputFile_;
+    std::string emptyFirmwareInputString_;
 };
 
 #endif
