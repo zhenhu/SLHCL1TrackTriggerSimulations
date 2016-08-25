@@ -306,7 +306,6 @@ int PatternMatcher::makeRoads(TString src, TString out) {
                 //   18 bits for z with  range of plus/minus 1024 cm
                 //   4 bits for stub bend info
                 //   7 bits for the strip ID within the module for radial conversion.
-                // int bend_4b = int(std::round(stub_ds)) >> 1;
                 int bend_4b = int(std::round(stub_ds));
                 int strip_7b = (halfStripRound(strip)) >> 4;
 

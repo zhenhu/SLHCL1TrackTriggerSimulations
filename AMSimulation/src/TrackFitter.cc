@@ -167,7 +167,6 @@ int TrackFitter::makeTracks(TString src, TString out) {
                                 l2gmap_ -> convert(moduleId, strip, segment, conv_r, conv_phi, conv_z, conv_l2g);
                                 l2gmap_ -> convertInt(moduleId, strip, segment, po_.tower, conv_l2g, conv_r_int, conv_phi_int, conv_z_int, conv_l2g_int);
 
-                                // int bend_4b = int(std::round(stub_ds)) >> 1;
                                 int bend_4b = int(std::round(stub_ds));
                                 int strip_7b = (halfStripRound(strip)) >> 4;
 
