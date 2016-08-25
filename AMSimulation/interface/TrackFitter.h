@@ -50,7 +50,7 @@ class TrackFitter {
                 std::cout << "error opening FirmwareInputRoads.txt" << std::endl;
                 return;
             }
-            firmwareOutputFile_.open("FirmwareOutput.txt");
+            firmwareOutputFile_.open("EmulatorOutput.txt");
             if (!firmwareOutputFile_) {
                 std::cout << "error opening FirmwareOutput.txt" << std::endl;
                 return;
@@ -69,7 +69,8 @@ class TrackFitter {
     // Main driver
     int run();
 
-    void writeFirmwareInput(const std::vector<std::vector<unsigned> > & stubRefs, TTRoadReader & reader);
+    void writeFirmwareInput(const std::vector<std::vector<unsigned> > & stubRefs, TTRoadReader & reader,
+                            const long long & ievt);
     void writeFirmwareOutput(const TTTrack2 & atrack);
 
   private:
