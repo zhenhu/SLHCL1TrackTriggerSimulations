@@ -58,6 +58,9 @@ class PatternGenerator {
     // Write pattern bank
     int writePatterns(TString out);
 
+    // Write pattern bank to a .coe file for firmware
+    int writePatternsEmu(TString out);
+
     // Program options
     const ProgramOption po_;
     long long nEvents_;

@@ -25,7 +25,7 @@ class NTupleMaker {
         FLOAT_VV , DOUBLE_VV , LONG64_VV , ULONG64_VV , BOOL_VV ,
         CHAR_VVV , UCHAR_VVV , SHORT_VVV , USHORT_VVV , INT_VVV , UINT_VVV,
         FLOAT_VVV, DOUBLE_VVV, LONG64_VVV, ULONG64_VVV, BOOL_VVV,
-        STRING,
+        STRING_V,
         NumLeafTypes
     };
 

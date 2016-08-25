@@ -105,6 +105,8 @@ int NTupleMaker::writeTree(TString out) {
     // For merging
     chain_roads_->SetBranchStatus("*", 0);
     chain_roads_->SetBranchStatus("AMTTRoads_*", 1);
+    chain_roads_->SetBranchStatus("TTStubs_bitString", 1);
+    chain_roads_->SetBranchStatus("TTStubs_superstripId", 1);
     TObjArray* branches_roads = chain_roads_->GetListOfBranches();
     for (int i=0; i<branches_roads->GetEntries(); ++i) {
         TBranch* branch = (TBranch*) branches_roads->At(i);
@@ -192,6 +194,7 @@ void NTupleMaker::makeLeafMap() {
     leafmap["Long64_t"] = LONG64_T;
     leafmap["ULong64_t"] = ULONG64_T;
 
+    leafmap["vector<string>"] = STRING_V;
     leafmap["vector<char>"] = CHAR_V;
     leafmap["vector<unsigned char>"] = UCHAR_V;
     leafmap["vector<short>"] = SHORT_V;
@@ -248,6 +251,7 @@ void NTupleMaker::makeConnector(const TBranch* branch, TTree* tree) {
         case ULONG64_T  : connectors.push_back(new TypedBranchConnector<ULong64_t> (branchName, "l", tree) ); break;
         case BOOL_T     : connectors.push_back(new TypedBranchConnector<Bool_t>    (branchName, "O", tree) ); break;
 
+        case STRING_V   : connectors.push_back(new TypedBranchConnector<std::vector<std::string>>(branchName, "", tree) ); break;
         case CHAR_V     : connectors.push_back(new TypedBranchConnector<std::vector<Char_t> >    (branchName, "", tree) ); break;
         case UCHAR_V    : connectors.push_back(new TypedBranchConnector<std::vector<UChar_t> >   (branchName, "", tree) ); break;
         case SHORT_V    : connectors.push_back(new TypedBranchConnector<std::vector<Short_t> >   (branchName, "", tree) ); break;

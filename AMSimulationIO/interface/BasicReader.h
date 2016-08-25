@@ -43,6 +43,7 @@ class BasicReader {
     std::vector<int> *            vp_charge;
 
     // Stub information
+    std::vector<float> *          vb_simPt;
     std::vector<float> *          vb_x;
     std::vector<float> *          vb_y;
     std::vector<float> *          vb_z;

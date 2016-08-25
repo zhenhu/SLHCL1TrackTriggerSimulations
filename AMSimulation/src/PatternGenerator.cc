@@ -3,6 +3,9 @@
 #include "SLHCL1TrackTriggerSimulations/AMSimulationIO/interface/PatternBankReader.h"
 #include "SLHCL1TrackTriggerSimulations/AMSimulationIO/interface/TTStubReader.h"
 
+#include <fstream>
+#include <bitset>
+
 static const unsigned MAX_FREQUENCY = 0xffffffff;  // unsigned
 
 namespace {
@@ -315,6 +318,52 @@ int PatternGenerator::writePatterns(TString out) {
 
 
 // _____________________________________________________________________________
+// // Output patterns into a coe file for firmware
+int PatternGenerator::writePatternsEmu(TString out) {
+    std::ofstream outfile_txt, outfile_coe;
+    outfile_txt.open(out+".txt");
+    outfile_coe.open(out+".coe");
+    outfile_coe<<"memory_initialization_radix=2;\n"<<"memory_initialization_vector=\n";
+
+    // _________________________________________________________________________
+    // Save pattern bank
+    const long long npatterns = patternBank_pairs_.size();
+
+    // Bookkeepers
+    unsigned freq = MAX_FREQUENCY;
+
+    for (long long ipatt=0; ipatt<npatterns; ++ipatt) {
+        freq = patternBank_pairs_.at(ipatt).second;
+        if (freq < (unsigned) po_.minFrequency)  // cut off
+            break;
+   
+        outfile_txt<<freq;
+        const pattern_type& patt = patternBank_pairs_.at(ipatt).first;
+        for (unsigned ilayer=0; ilayer<po_.nLayers; ++ilayer) {
+            int phi_ss = patt.at(ilayer) % 512;
+            int z_ss   = patt.at(ilayer) / 512;
+            outfile_txt<<" "<<phi_ss<<" "<<z_ss;
+        }
+        outfile_txt<<"\n";
+
+        std::bitset<5> col(31-ipatt/32);
+        std::bitset<5> row(31-ipatt%32); 
+        outfile_coe<<"1"<<col<<row;
+        for (unsigned ilayer=0; ilayer<po_.nLayers; ++ilayer) {
+            std::bitset<12> ss(patt.at(po_.nLayers-1-ilayer));
+            outfile_coe<<ss;
+        }
+        if (ipatt!=npatterns-1) outfile_coe<<",\n";
+        else outfile_coe<<";\n";
+    }
+
+    outfile_txt.close();
+    outfile_coe.close();
+	 return 0;
+}
+
+
+// _____________________________________________________________________________
 // Main driver
 int PatternGenerator::run() {
     int exitcode = 0;
@@ -327,6 +376,12 @@ int PatternGenerator::run() {
     exitcode = writePatterns(po_.output);
     if (exitcode)  return exitcode;
     Timing();
+
+    if (po_.emu == 1) {
+        exitcode = writePatternsEmu(po_.output);
+        if (exitcode)  return exitcode;
+        Timing();
+    }
 
     return exitcode;
 }

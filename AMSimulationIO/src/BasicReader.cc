@@ -14,6 +14,7 @@ BasicReader::BasicReader(int verbose)
   vp_vz               (0),
   vp_charge           (0),
   //
+  vb_simPt            (0),
   vb_x                (0),
   vb_y                (0),
   vb_z                (0),
@@ -72,6 +73,7 @@ int BasicReader::init(TString src, bool full) {
     tchain->SetBranchAddress("genParts_vy"       , &(vp_vy));
     tchain->SetBranchAddress("genParts_vz"       , &(vp_vz));
     tchain->SetBranchAddress("genParts_charge"   , &(vp_charge));
+    tchain->SetBranchAddress("TTStubs_simPt"     , &(vb_simPt));
     if (full)  tchain->SetBranchAddress("TTStubs_x"         , &(vb_x));
     if (full)  tchain->SetBranchAddress("TTStubs_y"         , &(vb_y));
     tchain->SetBranchAddress("TTStubs_z"         , &(vb_z));
@@ -95,6 +97,7 @@ int BasicReader::init(TString src, bool full) {
     tchain->SetBranchStatus("genParts_vy"       , 1);
     tchain->SetBranchStatus("genParts_vz"       , 1);
     tchain->SetBranchStatus("genParts_charge"   , 1);
+    tchain->SetBranchStatus("TTStubs_simPt"     , 1);
     if (full)  tchain->SetBranchStatus("TTStubs_x"         , 1);
     if (full)  tchain->SetBranchStatus("TTStubs_y"         , 1);
     tchain->SetBranchStatus("TTStubs_z"         , 1);
@@ -113,6 +116,7 @@ int BasicReader::init(TString src, bool full) {
 }
 
 void BasicReader::nullStubs(const std::vector<bool>& nulling, bool full) {
+    nullVectorElements(vb_simPt     , nulling);
     if (full)  nullVectorElements(vb_x         , nulling);
     if (full)  nullVectorElements(vb_y         , nulling);
     nullVectorElements(vb_z         , nulling);
