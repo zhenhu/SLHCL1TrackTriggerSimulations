@@ -149,6 +149,7 @@ int PatternGenerator::makePatterns(TString src) {
             Attributes * attr = ins.first->second;
             if (attr) {
                 ++ attr->n;
+                attr->id = ievt;
                 attr->invPt.fill(simChargeOverPt);
                 attr->cotTheta.fill(simCotTheta);
                 attr->phi.fill(simPhi);
@@ -336,9 +337,11 @@ int PatternGenerator::writePatternsEmu(TString out) {
         freq = patternBank_pairs_.at(ipatt).second;
         if (freq < (unsigned) po_.minFrequency)  // cut off
             break;
-   
-        outfile_txt<<freq;
+
         const pattern_type& patt = patternBank_pairs_.at(ipatt).first;
+        
+        if (po_.speedup<1) outfile_txt << patternAttributes_map_.at(patt)->id;
+        else if (po_.speedup==1) outfile_txt << freq;
         for (unsigned ilayer=0; ilayer<po_.nLayers; ++ilayer) {
             int phi_ss = patt.at(ilayer) % 512;
             int z_ss   = patt.at(ilayer) / 512;

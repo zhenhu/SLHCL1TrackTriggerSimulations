@@ -16,7 +16,7 @@ unsigned LUTGenerator::localModuleId(unsigned moduleId) {
 
     unsigned lad = decodeLadder(moduleId);
     unsigned mod = decodeModule(moduleId);
-    unsigned newModuleId = ((lad & 0xf) << 4) | (mod & 0xf);
+    unsigned newModuleId = ((mod & 0x1f) << 4) | (lad & 0xf);
 
     return newModuleId;
 }
@@ -61,7 +61,7 @@ int LUTGenerator::makeLocalToGlobal() {
             bitString += std::bitset<18>(conv_l2g_int.i_phi).to_string();
             bitString += std::bitset<18>(conv_l2g_int.i_z0).to_string();
             bitString += std::bitset<18>(conv_l2g_int.i_z).to_string();
-            bitString += std::bitset<8>(newModuleId).to_string();
+            bitString += std::bitset<9>(newModuleId).to_string();
             bitString += std::bitset<3>(chipId).to_string();
             bitStrings.push_back(bitString);
 
@@ -73,12 +73,18 @@ int LUTGenerator::makeLocalToGlobal() {
     for (unsigned i=0; i<bitStrings_breaks.size(); ++i) {
         // Open text file
         TString txtname = Form("lut_L2G_l%i.txt", i+5);
+        TString coename = Form("lut_L2G_l%i.coe", i+5);
         ofstream txtfile(txtname.Data());
+        ofstream coefile(coename.Data());
+        coefile<<"memory_initialization_radix=2;\n"<<"memory_initialization_vector=\n";
 
         // Write text file
         std::vector<std::string>::const_iterator it=bitStrings.begin()+(i == 0 ? 0 : bitStrings_breaks.at(i-1));
         for (; it!=bitStrings.begin() + bitStrings_breaks.at(i); ++it) {
             txtfile << *it << std::endl;
+            coefile << "111" << *it;
+            if (it != bitStrings.begin() + bitStrings_breaks.at(i) -1) coefile << ",\n";
+            else coefile << ";\n";
             if (verbose_ > 2) {
                 std::cout << *it << std::endl;
             }
@@ -86,6 +92,7 @@ int LUTGenerator::makeLocalToGlobal() {
 
         // Close text file
         txtfile.close();
+        coefile.close();
     }
 
     return 0;
@@ -133,7 +140,7 @@ int LUTGenerator::makeLocalToGlobalStar() {
             bitString += std::bitset<18>(conv_l2g_int.i_z).to_string();
             bitString += std::bitset<18>(conv_l2g_int.i_r0).to_string();
             bitString += std::bitset<18>(conv_l2g_int.i_r).to_string();
-            bitString += std::bitset<8>(newModuleId).to_string();
+            bitString += std::bitset<9>(newModuleId).to_string();
             bitString += std::bitset<3>(chipId).to_string();
             bitStrings.push_back(bitString);
 
@@ -145,12 +152,18 @@ int LUTGenerator::makeLocalToGlobalStar() {
     for (unsigned i=0; i<bitStrings_breaks.size(); ++i) {
         // Open text file
         TString txtname = Form("lut_L2GStar_l%i.txt", i+5);
+        TString coename = Form("lut_L2GStar_l%i.coe", i+5);
         ofstream txtfile(txtname.Data());
+        ofstream coefile(coename.Data());
+        coefile<<"memory_initialization_radix=2;\n"<<"memory_initialization_vector=\n";
 
         // Write text file
         std::vector<std::string>::const_iterator it=bitStrings.begin()+(i == 0 ? 0 : bitStrings_breaks.at(i-1));
         for (; it!=bitStrings.begin()+bitStrings_breaks.at(i); ++it) {
             txtfile << *it << std::endl;
+            coefile << "111" << *it;
+            if (it != bitStrings.begin() + bitStrings_breaks.at(i) -1) coefile << ",\n";
+            else coefile << ";\n";
             if (verbose_ > 2) {
                 std::cout << *it << std::endl;
             }
@@ -158,6 +171,7 @@ int LUTGenerator::makeLocalToGlobalStar() {
 
         // Close text file
         txtfile.close();
+        coefile.close();
     }
 
     return 0;
