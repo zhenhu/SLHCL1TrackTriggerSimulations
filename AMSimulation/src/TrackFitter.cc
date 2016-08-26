@@ -103,7 +103,7 @@ int TrackFitter::makeTracks(TString src, TString out) {
             //        stubRefs.at(ilayer).resize(po_.maxStubs);
             //}
 
-            if (po_.emu != 0) writeFirmwareInput(stubRefs, reader);
+            if (po_.emu != 0) writeFirmwareInput(stubRefs, reader, ievt);
 
             // const std::vector<std::vector<unsigned> > & combinations = combinationFactory_.combine(stubRefs);
 
@@ -353,8 +353,11 @@ int TrackFitter::run() {
 }
 
 
-void TrackFitter::writeFirmwareInput(const std::vector<std::vector<unsigned> > & stubRefs, TTRoadReader & reader)
+void TrackFitter::writeFirmwareInput(const std::vector<std::vector<unsigned> > & stubRefs, TTRoadReader & reader,
+                                     const long long & ievt)
 {
+    // Keep track of the event id
+    firmwareInputFile_ << std::setfill('0') << std::setw(5) << ievt << " ";
     unsigned ilayer = 0;
     for (auto layer : stubRefs) {
         // std::cout << "layer " << ilayer << ": ";
