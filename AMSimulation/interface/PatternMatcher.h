@@ -18,7 +18,7 @@ class PatternMatcher {
     // Constructor
     PatternMatcher(const ProgramOption& po)
     : po_(po),
-      nEvents_(po.maxEvents), verbose_(po.verbose), removeOverlap_(po.removeOverlap),
+      nEvents_(po.maxEvents), verbose_(po.verbose), removeOverlap_(po.removeOverlap), stubDsFilter_(po.stubDsFilter), 
       prefixRoad_("AMTTRoads_"), suffix_("") {
 
         // Initialize
@@ -62,6 +62,7 @@ class PatternMatcher {
     long long nEvents_;
     int verbose_;
     bool removeOverlap_;
+    bool stubDsFilter_;
 
     // Configurations
     const TString prefixRoad_;

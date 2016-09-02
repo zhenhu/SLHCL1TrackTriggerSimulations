@@ -62,6 +62,7 @@ struct ProgramOption {
 
     bool        no_trim;
     bool        removeOverlap;
+    bool        stubDsFilter;
 
     std::string datadir;
 };

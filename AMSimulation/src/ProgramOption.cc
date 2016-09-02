@@ -66,6 +66,7 @@ std::ostream& operator<<(std::ostream& o, const ProgramOption& po) {
 
       << "  no_trim: "      << po.no_trim
       << "  removeOverlap: "<< po.removeOverlap
+      << "  stubDsFilter: " << po.stubDsFilter
 
       << "  datadir: "      << po.datadir
       ;

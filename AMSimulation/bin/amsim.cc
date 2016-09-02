@@ -103,6 +103,7 @@ int main(int argc, char **argv) {
         ("maxMisses"    , po::value<int>(&option.maxMisses)->default_value(0), "Specify max number of allowed misses")
         ("maxStubs"     , po::value<int>(&option.maxStubs)->default_value(4), "Specfiy max number of stubs per superstrip")
         ("maxRoads"     , po::value<int>(&option.maxRoads)->default_value(999999999), "Specfiy max number of roads per event")
+        ("stubDsFilter" , po::bool_switch(&option.stubDsFilter)->default_value(false), "require stubs to pass the stub pT (deltaS) cut (default: false)")
 
         // Only for matrix building
         ("view"         , po::value<std::string>(&option.view)->default_value("XYZ"), "Specify fit view (e.g. XYZ, XY, RZ)")

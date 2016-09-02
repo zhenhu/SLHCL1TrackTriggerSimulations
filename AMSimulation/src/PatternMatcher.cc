@@ -166,13 +166,19 @@ int PatternMatcher::makeRoads(TString src, TString out) {
         // Skip stubs
 
         std::vector<bool> stubsNotInTower;  // true: not in this trigger tower
+        std::vector<bool> stubsFailDeltaS;  // true; stub does not pass the delta S filter
         std::vector<bool> stubsInOverlapping(nstubs,false);  // true: stub is in overlapping region and has TO BE removed
         for (unsigned istub=0; istub<nstubs; ++istub) {
         	unsigned moduleId = reader.vb_modId   ->at(istub);
+         float    stub_ds  = reader.vb_trigBend->at(istub);  // in full-strip unit
 
         	// Skip if not in this trigger tower
         	bool isNotInTower = (ttrmap.find(moduleId) == ttrmap.end());
         	stubsNotInTower.push_back(isNotInTower);
+
+         // Skip if not pass the stub pT (delta S) filter
+         bool failDetlaS = !(stubDeltaSFilter(moduleId, stub_ds));
+         stubsFailDeltaS.push_back(failDetlaS);
 
         	// RR // Skip if in overlapping regions
           if (removeOverlap_) {
@@ -209,6 +215,9 @@ int PatternMatcher::makeRoads(TString src, TString out) {
         } // endif removeOverlap_
         // Null stub information for those that are not in this trigger tower
         reader.nullStubs(stubsNotInTower);
+        // Null stub information for those that does not pass the deltaS cut
+        if (stubDsFilter_) reader.nullStubs(stubsFailDeltaS);
+
 
         // _____________________________________________________________________
         // Skip tracking particles
@@ -248,6 +257,13 @@ int PatternMatcher::makeRoads(TString src, TString out) {
                 stubs_superstripId.push_back(0);
                 continue;
             }
+
+            bool failDetlaS = stubsFailDeltaS.at(istub);
+            if (stubDsFilter_ && failDetlaS) {
+                stubs_bitString.push_back("");
+                stubs_superstripId.push_back(0);
+                continue;
+            }   
 
             if ((removeOverlap_) && stubsInOverlapping.at(istub)) {
                 stubs_bitString.push_back("");
